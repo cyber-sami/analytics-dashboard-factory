@@ -58,6 +58,7 @@ Paste these into the box on `/pipeline` (they are also in `demo-prompts.md`).
 
 - **Real:** the engine, the rules, the verdicts, the approval and audit flow, and the structure and ownership of generated dashboards.
 - **Synthetic:** all estate and KPI data comes from the synthetic Since AI Builder Data Pack (not Bayer data), stored in `engine/data/bayer_pack.xlsx`.
+- **Pre-existing vs built at the event:** the data pack was provided by the organisers (Since AI) and existed before the hackathon. Everything else in this repository (the engine, the rules, the pages, the evaluation) was built during the event, using open-source libraries.
 - **No invented numbers.** Generated dashboard tiles use only values from the pack:
   - Governed KPIs with pack data get a chart (net sales, units shipped, forecast variance, market access coverage, OTIF, inventory coverage, plus derived growth, forecast accuracy, bias and report adoption).
   - A measure that is not a governed KPI but has pack data (forecast value, report views, query errors) is shown and marked *not governed*.
@@ -159,6 +160,8 @@ static/   the four front-end pages (plain HTML, CSS and JS, no build step)
 ## Stack
 
 Python 3.12, FastAPI, pandas, Gemini (Google AI Studio) with a model fallback chain and circuit breaker, plain HTML/JS front end with Chart.js.
+
+Built with Claude Code and Gemini: Claude Code helped write the code, and Gemini (Google AI Studio) reads the request at run time. Verdicts come from rules, not from either model.
 
 ## Design
 
