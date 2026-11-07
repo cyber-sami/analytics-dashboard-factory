@@ -52,7 +52,7 @@ Paste these into the box on `/pipeline` (they are also in `demo-prompts.md`).
 
 - **Rules decide, the LLM only reads.** Verdicts come from a deterministic engine over the data pack, so the same request always gets the same answer, and every verdict cites its evidence and the rules behind it (RULE-001 to RULE-008). Gemini only extracts the intent from the request; its output is validated against the estate and anything it invents is dropped. If Gemini is unavailable, a rule-based parser takes over, so the demo never dies.
 - **Governance is code, not prompt.** Only active owners can approve, requesters cannot approve their own request, open questions block approval, every approval needs an accountable owner, and the audit log detects tampering.
-- **We measure it.** `python -m engine.evaluate` runs 32 hand-written scenarios across Finance, Market Access, Supply chain, Marketing, Quality, legacy migration and out-of-scope domains (HR, R&D). They include typos, empty input, gibberish and injection-style text. It also checks governance invariants on all 150 synthetic business requests. Current result: **32/32 scenarios, 150/150 invariants, 287/287 flow checks** (the flow checks cover ownership, contacts, data provenance, the audit trace and the open-questions gate). Writing it found and fixed real engine bugs.
+- **We measure it.** `python -m engine.evaluate` runs 32 hand-written scenarios across Finance, Market Access, Supply chain, Marketing, Quality, legacy migration and out-of-scope domains (HR, R&D). They include typos, empty input, gibberish and injection-style text. It also checks governance invariants on all 150 synthetic business requests. Current result: **32/32 scenarios, 150/150 invariants, 323/323 flow checks** (the flow checks cover ownership, contacts, data provenance, the audit trace and the open-questions gate). Writing it found and fixed real engine bugs.
 
 ## Data assumptions: what is real and what is simulated
 
@@ -112,7 +112,7 @@ IT has to approve and run this, so we designed for a small risk of switching it 
 |---|---|
 | "Will it change my BI platform?" | Advisory first: it reads metadata and recommends. It never writes to Power BI or Tableau, and nothing is published without a named owner's approval |
 | "What data leaves the building?" | No business data. The engine works on asset, KPI and owner metadata. The optional Gemini step sees only the request text and the list of allowed product, market and KPI names. The request text does go to Google, and without a key the rule-based parser works with no external call |
-| "Can I understand and test it?" | Verdicts are rules, not model opinions, and each cites its evidence. `python -m engine.evaluate` is the regression check (32 scenarios, 150 invariants, 287 flow checks) to run after changing a rule |
+| "Can I understand and test it?" | Verdicts are rules, not model opinions, and each cites its evidence. `python -m engine.evaluate` is the regression check (32 scenarios, 150 invariants, 323 flow checks) to run after changing a rule |
 | "Is it heavy to run?" | One Python process, no database, no front-end build |
 | "Who decides, and can I prove it later?" | Named owners decide, the requester cannot approve their own request, and the audit log is hash-chained. Download it as JSON or CSV (pipeline and trace pages) for a SIEM or an auditor |
 | "What is waiting for me?" | The pipeline page lists requests waiting for approval and approved dashboards that need review, most urgent first |
