@@ -16,7 +16,8 @@ def _preview(d: dict) -> dict | None:
     """A compact first chart for the card: the first tile that has a monthly series."""
     for t in d["tiles"]:
         if t["state"] == "ready" and t.get("kind") != "snapshot" and t.get("series"):
-            return {"metric": t["metric"], "value": t["value"], "unit": t["unit"], "values": [p["value"] for p in t["series"]]}
+            return {"metric": t["metric"], "unit": t["unit"], "value": t["value"], "previous": t["previous"],
+                    "change_basis": t["change_basis"], "direction": t["direction"], "values": [p["value"] for p in t["series"]]}
     return None
 
 

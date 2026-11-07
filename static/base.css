@@ -1,0 +1,38 @@
+/* Shared by Home, the dashboard, the pipeline and Trace: tokens, type, header, focus, loading and error states.
+   Page-specific layout stays in each page. Two weights (400, 800); three text sizes (--s, body, --l) plus the big number. */
+:root {
+  /* Own palette, inspired by the Bayer brand (blue + green). Not official Bayer colours. */
+  --navy: #0B2D3E; --brand-blue: #0068A8; --brand-green: #5DBB46; --bg: #F4F8FB; --card: #ffffff; --ink: #0B2D3E; --muted: #35566A; --line: #D5E2EB; --mist: #E8F3FA;
+  --ok: #1a7f46; --ok-bg: #e3f6ea; --alert: #C8003F; --alert-bg: #fde4e7;
+  --warn: #8A5300; --warn-bg: #FFF1D6; /* amber for watch and pending; blue is kept for actions and "this one" */
+  --s: .9em; --l: 1.3em;
+  --u: clamp(15px, 1vw, 22px); /* scales everything up on a wall screen */
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Figtree", system-ui, "Segoe UI", sans-serif; font-size: var(--u); font-weight: 400; font-variant-numeric: tabular-nums; }
+b, h1, h2 { font-weight: 800; }
+:focus-visible { outline: .18em solid var(--brand-blue); outline-offset: .18em; }
+
+header { background: linear-gradient(120deg, #0B2D3E 0%, #0068A8 100%); color: #fff; padding: 1.2em 2.4em; display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+header :focus-visible { outline-color: #fff; }
+header h1 { margin: 0; font-size: 1.6em; letter-spacing: -.01em; font-style: italic; }
+header .meta { color: #D3E3EE; max-width: 46em; }
+header nav { display: flex; gap: .6em; align-items: center; flex-wrap: wrap; }
+header a { color: #fff; text-decoration: none; font-weight: 800; background: #ffffff26; border-radius: 99em; padding: .5em 1.2em; }
+header a.light { background: #fff; color: var(--navy); }
+@media (max-width: 800px) { header { padding-inline: 1em; } }
+
+.skip { position: absolute; left: -999px; top: 0; z-index: 50; background: #fff; color: var(--navy); font-weight: 800; padding: .6em 1em; border-radius: 0 0 .6em 0; }
+.skip:focus { left: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.skel { background: linear-gradient(90deg, #E8F3FA 25%, #F4F8FB 50%, #E8F3FA 75%); background-size: 200% 100%; animation: sh 1.2s infinite; border-radius: 1em; }
+@keyframes sh { to { background-position: -200% 0; } }
+.error { background: var(--alert-bg); border: .15em solid var(--alert); border-radius: .9em; padding: 1.4em 1.6em; }
+.error button { font: inherit; font-weight: 800; margin-left: 1em; padding: .4em 1.2em; border-radius: .5em; border: 0; background: var(--alert); color: #fff; cursor: pointer; }
+.empty { padding: 2em 1.4em; background: var(--card); border: .06em dashed var(--line); border-radius: 1.25em; color: var(--muted); }
+.empty b { display: block; color: var(--ink); }
+.small { color: var(--muted); font-size: var(--s); }
+.sub { color: var(--muted); font-size: var(--s); margin: 0 0 .8em; max-width: 65ch; }
+.takeaway { font-size: var(--l); font-weight: 800; line-height: 1.3; margin: 0 0 .7em; max-width: 40ch; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } .skel { animation: none; } }

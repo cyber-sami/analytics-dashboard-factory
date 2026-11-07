@@ -17,6 +17,26 @@ UNGOVERNED = [
     (("supply risk", "supply-risk", "red risk", "risk status", "routes at risk", "at red risk", "red route", "risky route", "route risk"),
      "Routes at red risk", "supply", None, None, "routes", 1),
 ]
+
+# Which way is "better" for a measure. One table for the home page, dashboards and My dashboards.
+# None = closest to zero is best (signed measures) or no sensible direction: the UI shows the change in neutral grey.
+# Keys are lower-case metric names; a tile name like "Net Sales · Cardio" is looked up by the part before " · ".
+HIGHER, LOWER = "higher_is_better", "lower_is_better"
+DIRECTION = {
+    "net sales": HIGHER, "units shipped": HIGHER, "market access coverage": HIGHER, "on-time in-full": HIGHER,
+    "on-time in full": HIGHER, "inventory coverage": HIGHER, "demand forecast accuracy": HIGHER, "report adoption": HIGHER,
+    "forecast variance": None, "net sales growth": None, "demand forecast bias": None,
+    "forecast (net sales)": None,   # a plan figure: neither more nor less is better
+    "report views": HIGHER, "report exports": HIGHER, "report subscriptions": HIGHER,
+    "report query errors": LOWER, "report load time": LOWER, "routes at red risk": LOWER,
+}
+
+
+def direction(metric: str) -> str | None:
+    """'higher_is_better', 'lower_is_better' or None (neutral). Unknown measures are neutral rather than guessed."""
+    return DIRECTION.get(metric.split(" · ")[0].strip().lower())
+
+
 PLATFORMS = {"power bi": "Power BI", "powerbi": "Power BI", "tableau": "Tableau"}
 
 

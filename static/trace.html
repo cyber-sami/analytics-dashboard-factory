@@ -5,53 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trace a dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,800;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/base.css">
 <style>
-  /* One page for an investigator: who asked, what evidence was shown, who approved, who owns it. Data: /api/trace/{id}. */
-  :root { --navy: #0B2D3E; --brand-blue: #0068A8; --bg: #F4F8FB; --card: #fff; --ink: #0B2D3E; --muted: #35566A; --line: #D5E2EB; --ok: #1a7f46; --ok-bg: #e3f6ea; --alert: #C8003F; --alert-bg: #fde4e7; --mist: #E8F3FA; --u: clamp(14px, 1vw, 20px); }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Figtree", system-ui, sans-serif; font-size: var(--u); font-variant-numeric: tabular-nums; }
-  b, h1, h2 { font-weight: 800; }
-  header { background: linear-gradient(120deg, #0B2D3E 0%, #0068A8 60%, #00B3B8 100%); color: #fff; padding: 1.2em 2.4em; display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
-  header h1 { margin: 0; font-size: 1.8em; font-style: italic; } header .meta { opacity: .85; font-size: 1.1em; }
-  header a { color: #fff; text-decoration: none; font-weight: 800; background: #ffffff2e; border-radius: 99em; padding: .5em 1.2em; margin-left: .4em; }
-  main { padding: 1.6em 2.4em 2.4em; display: grid; gap: 1.6em; max-width: 70em; } main > * { min-width: 0; }
-  h2 { margin: 0 0 .6em; font-size: 1em; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
-  .card { background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; padding: 1.1em 1.4em; }
-  .quote { font-size: 1.25em; border-left: .3em solid var(--brand-blue); padding-left: .8em; }
-  .small { color: var(--muted); font-size: .92em; }
+  /* Tokens, header, focus, skeleton and error styles live in /static/base.css. */
+  main { padding: 1.6em 2.4em 3em; max-width: 72em; margin: 0 auto; } main > * { min-width: 0; }
+  h2 { margin: 2em 0 .6em; font-size: 1.4em; }
+  .sec { border-top: .12em solid var(--navy); padding-top: 1em; }
   .row { display: flex; flex-wrap: wrap; gap: .6em; align-items: center; }
-  .chip { background: var(--mist); color: var(--muted); border-radius: 99em; padding: .2em .8em; font-weight: 600; }
-  .chip.ok { background: var(--ok-bg); color: var(--ok); font-weight: 800; } .chip.bad { background: var(--alert-bg); color: var(--alert); font-weight: 800; }
-  .verdict { display: inline-block; font-size: 1.6em; font-weight: 800; font-style: italic; background: var(--navy); color: #fff; border-radius: .5em; padding: .1em .7em; }
-  .evrow { background: var(--mist); border-radius: .75em; padding: .7em 1em; margin: .5em 0; line-height: 1.5; }
+  .chip { background: var(--mist); color: var(--ink); border-radius: 99em; padding: .2em .8em; font-weight: 800; }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); } .chip.bad { background: var(--alert-bg); color: var(--alert); }
+
+  .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; overflow: hidden; }
+  .summary > div { padding: 1em 1.3em; } .summary > div + div { border-left: .06em solid var(--line); }
+  .summary .big { font-size: 1.3em; font-weight: 800; }
+  .summary .verdict { font-size: 2.2em; font-weight: 800; font-style: italic; line-height: 1.1; }
+  .quote { font-size: 1.3em; line-height: 1.4; border-left: .3em solid var(--brand-blue); padding-left: .8em; max-width: 50ch; }
+  .evrow { background: var(--mist); border-radius: .75em; padding: .7em 1em; margin: .5em 0; line-height: 1.5; max-width: 65ch; }
+  .headline { font-size: 1.25em; line-height: 1.4; max-width: 55ch; margin: 0 0 .6em; }
+  .rule { border: .1em solid var(--brand-blue); color: var(--brand-blue); border-radius: .5em; padding: .2em .7em; }
+  ol, ul.plain { margin: .3em 0 0; padding-left: 1.4em; line-height: 1.7; }
   .contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(15em, 1fr)); gap: .8em; }
-  .contact { border: .06em solid var(--line); border-radius: 1em; padding: .7em 1em; } .contact.off { border: .12em solid var(--alert); }
-  .role { font-size: .8em; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  .warnbox { background: var(--alert-bg); border: .12em solid var(--alert); border-radius: 1em; padding: 1em 1.4em; } .warnbox ul { margin: 0; padding-left: 1.2em; line-height: 1.6; } .warnbox h3 { margin: 0 0 .3em; color: var(--alert); }
-  table { width: 100%; border-collapse: collapse; min-width: 34em; } th, td { padding: .5em .8em; border-bottom: .06em solid var(--line); text-align: left; } th { color: var(--muted); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; }
-  .dlb { font: inherit; font-weight: 700; font-size: .85em; background: #fff; color: var(--brand-blue); border: .1em solid var(--brand-blue); border-radius: .6em; padding: .2em .8em; cursor: pointer; }
-  .hash { font-family: ui-monospace, monospace; font-size: .9em; color: var(--muted); } .scroll { overflow-x: auto; }
+  .contact { background: var(--card); border: .06em solid var(--line); border-radius: 1em; padding: .7em 1em; } .contact.off { border: .12em solid var(--alert); }
+  .warnbox { background: var(--alert-bg); border: .12em solid var(--alert); border-radius: 1em; padding: 1em 1.4em; margin-top: 1.2em; max-width: 65em; } .warnbox ul { margin: 0; padding-left: 1.2em; line-height: 1.6; } .warnbox h3 { margin: 0 0 .3em; color: var(--alert); font-size: 1em; }
+  table { width: 100%; border-collapse: collapse; min-width: 34em; } th, td { padding: .6em .8em .6em 0; border-top: .06em solid var(--line); text-align: left; } th { color: var(--muted); font-size: var(--s); font-weight: 400; }
+  .btn { font: inherit; font-weight: 800; background: #fff; color: var(--brand-blue); border: .12em solid var(--brand-blue); border-radius: .7em; padding: .6em 1.1em; cursor: pointer; }
+  .hash { font-family: ui-monospace, monospace; font-size: var(--s); color: var(--muted); } .scroll { overflow-x: auto; }
   dl { display: grid; grid-template-columns: 11em 1fr; gap: .4em 1em; margin: 0; } dt { color: var(--muted); } dd { margin: 0; }
-  .error { background: var(--alert-bg); border: .15em solid var(--alert); border-radius: .9em; padding: 1.4em 1.6em; }
-  @media (max-width: 800px) { header, main { padding-inline: 1em; } dl { grid-template-columns: 1fr; } }
+  .skel { height: 8em; }
+  @media (max-width: 800px) { header, main { padding-inline: 1em; } dl { grid-template-columns: 1fr; } .summary { grid-template-columns: 1fr 1fr; } .summary > div:nth-child(odd) { border-left: 0; } .summary > div:nth-child(n+3) { border-top: .06em solid var(--line); } }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header>
   <div><h1 id="title">Trace</h1><div class="meta" id="meta"></div></div>
-  <div><a href="/my-dashboards">My dashboards</a><a href="/pipeline">← Back to the factory</a><a id="dlink" href="#" hidden>Open the dashboard →</a></div>
+  <nav aria-label="Pages"><a href="/my-dashboards">My dashboards</a><a href="/pipeline">Back to the factory</a><a id="dlink" class="light" href="#" hidden>Open dashboard</a></nav>
 </header>
-<main id="main"><div class="card">Loading…</div></main>
+<main id="main"><div class="skel"></div></main>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const when = s => esc(String(s || '').replace('T', ' ').slice(0, 16)) + ' UTC';
 const pid = location.pathname.split('/').pop();
+const sentence = s => { const t = String(s ?? '').replace(/_/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
 const stChip = s => s === 'active' ? '<span class="chip ok">active</span>' : s === 'inactive' ? '<span class="chip bad">no longer active</span>' : '<span class="chip bad">no owner recorded</span>';
+// Same verdict colours as the pipeline: red is kept for risk, blocked and rejected.
+const VERDICT = {
+  REUSE:       { label: 'Reuse',       band: 'linear-gradient(120deg,#5DBB46 0%,#00B3B8 100%)', fg: '#0B2D3E' },
+  EXTEND:      { label: 'Extend',      band: 'linear-gradient(120deg,#00B3B8 0%,#4DB8F5 100%)', fg: '#0B2D3E' },
+  CONSOLIDATE: { label: 'Consolidate', band: 'linear-gradient(120deg,#4DB8F5 0%,#8AD0F7 100%)', fg: '#0B2D3E' },
+  MIGRATE:     { label: 'Migrate',     band: 'linear-gradient(120deg,#0B2D3E 0%,#0068A8 100%)', fg: '#fff' },
+  RETIRE:      { label: 'Retire',      band: 'linear-gradient(120deg,#4A5A66 0%,#2F3E48 100%)', fg: '#fff' },
+  NEW_BUILD:   { label: 'Build new',   band: 'linear-gradient(120deg,#0068A8 0%,#005A94 100%)', fg: '#fff' }
+};
+const VERBS = { approve: 'Approved', reject: 'Rejected', request_changes: 'Changes requested' };
 
 // spec.target_asset means different things per verdict.
-const TARGET_LABEL = { RETIRE: 'asset to archive', MIGRATE: 'legacy asset being replaced', CONSOLIDATE: 'asset to consolidate' };
+const TARGET_LABEL = { RETIRE: 'Asset to archive', MIGRATE: 'Legacy asset being replaced', CONSOLIDATE: 'Asset to consolidate' };
 let TRACE = null;
 // Audit export for a SIEM or an auditor: the same chained entries, as JSON or CSV.
 function saveFile(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
@@ -64,39 +75,61 @@ function downloadAudit(kind) {
 function render(t) {
   TRACE = t;
   const r = t.recommendation || {}, dec = t.decision, acc = t.accountability || {}, au = t.audit || {}, u = t.understood_as || {};
-  $('title').textContent = 'Trace: ' + (t.spec_snapshot?.title || t.proposal_id);
-  $('meta').textContent = `${t.proposal_id} · status ${String(t.status).replace(/_/g, ' ')}`;
+  const name = t.spec_snapshot?.title || t.proposal_id, v = VERDICT[r.verdict] || { label: sentence(r.verdict), band: '#0B2D3E', fg: '#fff' };
+  $('title').textContent = 'Trace: ' + name; document.title = 'Trace: ' + name;
+  $('meta').textContent = `Request ${t.proposal_id}, status ${String(t.status).replace(/_/g, ' ')}`;
   if (t.dashboard_generated) { $('dlink').href = '/dashboard/' + encodeURIComponent(t.proposal_id); $('dlink').hidden = false; }
   const known = [...(u.products || []), ...(u.markets || []), ...(u.metrics || [])], newm = u.new_measures || [];
-  const W = acc.warnings || [];
+  const W = acc.warnings || [], entries = au.entries || [];
+  const owner = (acc.contacts || []).find(c => dec && c.name && c.name === dec.accountable_owner);
   $('main').innerHTML = `
-  ${W.length ? `<div class="warnbox"><h3>Check before relying on this dashboard</h3><ul>${W.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
-  <section class="card"><h2>1 · Who asked, and for what</h2><div class="quote">“${esc(t.request?.text)}”</div>
+  <section class="summary" aria-label="Summary">
+    <div style="background:${v.band};color:${v.fg}"><div>Recommended</div><div class="verdict">${esc(v.label)}</div></div>
+    <div><div class="small">Decision</div>${dec ? `<div class="big">${esc(VERBS[dec.decision] || sentence(dec.decision))}</div><div class="small">by ${esc(dec.name)}, ${when(dec.at)}</div>` : '<div class="big">Not decided yet</div>'}</div>
+    <div><div class="small">Accountable owner</div><div class="big">${esc(dec?.accountable_owner || 'Not named')}</div>${owner ? stChip(owner.status) : ''}</div>
+    <div><div class="small">Audit log</div><div class="big" style="color:${au.chain_valid ? 'var(--ok)' : 'var(--alert)'}">${au.chain_valid ? '✓ Intact' : '✕ Altered'}</div><div class="small">${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}${au.chain_valid ? ', none changed' : ', do not rely on this record'}</div></div>
+  </section>
+  ${W.length ? `<div class="warnbox" role="alert"><h3>⚠ Check before relying on this dashboard</h3><ul>${W.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
+
+  <h2>Who asked, and for what</h2>
+  <section class="sec"><div class="quote">“${esc(t.request?.text)}”</div>
     <p class="small">Asked by <b>${esc(t.request?.requester)}</b> on ${when(t.request?.at)}</p>
-    <div class="row">${known.map(x => `<span class="chip">${esc(x)}</span>`).join('')}${newm.map(x => `<span class="chip bad">no governed KPI: ${esc(x)}</span>`).join('')}</div>
-    ${(t.clarifying_questions || []).length ? `<p class="small">Questions the factory asked: ${t.clarifying_questions.map(esc).join(' · ')}</p>` : ''}</section>
-  <section class="card"><h2>2 · What the factory recommended, and the evidence shown</h2>
-    <span class="verdict">${esc(String(r.verdict).replace('_', ' '))}</span><p>${esc(r.headline)}</p>
+    <div class="row">${known.map(x => `<span class="chip">${esc(x)}</span>`).join('')}${newm.map(x => `<span class="chip bad">No governed KPI: ${esc(x)}</span>`).join('')}</div>
+    ${(t.clarifying_questions || []).length ? `<p class="small">Questions the factory asked:</p><ul class="plain">${t.clarifying_questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>` : ''}</section>
+
+  <h2>What the factory recommended, and the evidence shown</h2>
+  <section class="sec"><p class="headline">${esc(r.headline)}</p>
     ${(r.evidence || []).map(e => `<div class="evrow">${esc(e)}</div>`).join('')}
-    ${(r.actions || []).length ? `<p class="small"><b>Suggested next steps:</b> ${r.actions.map(esc).join(' · ')}</p>` : ''}
-    <div class="row">${Object.entries(r.rules_cited || {}).map(([k, v]) => `<span class="chip">${esc(k)} ${esc(v)}</span>`).join('')}</div></section>
-  <section class="card"><h2>3 · Who approved it</h2>${dec ? `<dl><dt>Decision</dt><dd><b>${esc(String(dec.decision).replace('_', ' '))}</b></dd><dt>By</dt><dd>${esc(dec.name)}, ${esc(dec.role)}</dd><dt>When</dt><dd>${when(dec.at)}</dd>
+    ${(r.actions || []).length ? `<p><b>Suggested next steps</b></p><ol>${r.actions.map(a => `<li>${esc(a)}</li>`).join('')}</ol>` : ''}
+    <div class="row" style="margin-top:1em">${Object.entries(r.rules_cited || {}).map(([k, val]) => `<span class="rule">${esc(k)} ${esc(val)}</span>`).join('')}</div></section>
+
+  <h2>The decision</h2>
+  <section class="sec">${dec ? `<dl><dt>Decision</dt><dd><b>${esc(VERBS[dec.decision] || sentence(dec.decision))}</b></dd><dt>By</dt><dd>${esc(dec.name)}, ${esc(dec.role)}</dd><dt>When</dt><dd>${when(dec.at)}</dd>
       <dt>Comment</dt><dd>${esc(dec.comment || 'none')}</dd><dt>Accountable owner</dt><dd><b>${esc(dec.accountable_owner || 'n/a')}</b></dd></dl>` : '<p>No decision yet.</p>'}</section>
-  <section class="card"><h2>4 · Who owns it now, read from the data pack just now</h2>
-    <div class="contacts">${(acc.contacts || []).map(c => `<div class="contact${c.status !== 'active' ? ' off' : ''}"><div class="role">${esc(c.role)}</div><b>${esc(c.name || 'Nobody recorded')}</b> ${stChip(c.status)}<div class="small">${esc(c.owner_role || '')}${c.email ? ' · ' + esc(c.email) : ''}</div><div class="small">${esc(c.why || '')}</div></div>`).join('')}</div>
-    ${acc.lifecycle ? `<p class="small">Lifecycle: <b>${esc(acc.lifecycle.state)}</b>, review due ${esc(acc.lifecycle.review_due)} (${esc(acc.lifecycle.review_policy)})</p>` : ''}</section>
-  <section class="card"><h2>5 · What was built</h2>${t.dashboard_generated ? `<p>A dashboard was generated on ${when(t.dashboard_generated.ts)}. <a href="/dashboard/${encodeURIComponent(t.proposal_id)}">Open it →</a></p>` : '<p>No dashboard was built. A retirement or a pending decision builds nothing.</p>'}
-    ${t.spec_snapshot ? `<p class="small">Spec at approval: <b>${esc(t.spec_snapshot.title)}</b> · ${esc(String(t.spec_snapshot.action).replace('_', ' '))} · status ${esc(t.spec_snapshot.status)}${t.spec_snapshot.target_asset ? ' · ' + (TARGET_LABEL[r.verdict] || 'asset in focus') + ' ' + esc(t.spec_snapshot.target_asset) : ''}</p>` : ''}</section>
-  <section class="card"><div class="row" style="justify-content:space-between;margin-bottom:.6em"><h2 style="margin:0">6 · Tamper-evident audit trail</h2>
-    <span class="row"><span class="chip ${au.chain_valid ? 'ok' : 'bad'}">${au.chain_valid ? '✓ Chain intact' : '✕ Chain broken'}</span><button class="dlb" onclick="downloadAudit('json')">Download JSON</button><button class="dlb" onclick="downloadAudit('csv')">Download CSV</button></span></div>
-    <div class="scroll"><table><tr><th>When</th><th>Who</th><th>What happened</th><th>Hash</th></tr>${(au.entries || []).map(e => `<tr><td>${esc(String(e.ts).replace('T', ' ').slice(0, 19))}</td><td>${esc(e.actor)}</td><td><b>${esc(String(e.event).replace(/_/g, ' '))}</b></td><td class="hash">${esc(String(e.hash).slice(0, 12))}…</td></tr>`).join('')}</table></div></section>`;
+
+  <h2>Who owns it now</h2>
+  <div class="sub">Read from the data pack just now.</div>
+  <section class="sec"><div class="contacts">${(acc.contacts || []).map(c => `<div class="contact${c.status !== 'active' ? ' off' : ''}"><div class="small">${esc(c.role)}</div><b>${esc(c.name || 'Nobody recorded')}</b> ${stChip(c.status)}<div class="small">${esc(c.owner_role || '')}${c.email ? ', ' + esc(c.email) : ''}</div><div class="small">${esc(c.why || '')}</div></div>`).join('')}</div>
+    ${acc.lifecycle ? `<p class="small">Review and upkeep: <b>${esc(acc.lifecycle.state)}</b>, review due ${esc(acc.lifecycle.review_due)} (${esc(acc.lifecycle.review_policy)})</p>` : ''}</section>
+
+  <h2>What was built</h2>
+  <section class="sec">${t.dashboard_generated ? `<p>A dashboard was generated on ${when(t.dashboard_generated.ts)}. <a href="/dashboard/${encodeURIComponent(t.proposal_id)}">Open it</a></p>` : '<p>No dashboard was built. A retirement or a pending decision builds nothing.</p>'}
+    ${t.spec_snapshot ? `<dl class="small"><dt>Spec at approval</dt><dd>${esc(t.spec_snapshot.title)}</dd><dt>Action</dt><dd>${esc(String(t.spec_snapshot.action).replace('_', ' '))}</dd><dt>Status</dt><dd>${esc(t.spec_snapshot.status)}</dd>${t.spec_snapshot.target_asset ? `<dt>${TARGET_LABEL[r.verdict] || 'Asset in focus'}</dt><dd>${esc(t.spec_snapshot.target_asset)}</dd>` : ''}</dl>` : ''}</section>
+
+  <div class="row" style="justify-content:space-between;margin:2em 0 .6em"><h2 style="margin:0">Audit log</h2>
+    <span class="row"><span class="chip ${au.chain_valid ? 'ok' : 'bad'}">${au.chain_valid ? '✓ Audit log intact' : '✕ Audit log altered'}</span><button class="btn" onclick="downloadAudit('json')">Download JSON</button><button class="btn" onclick="downloadAudit('csv')">Download CSV</button></span></div>
+  <section class="sec scroll"><table><tr><th>When</th><th>Who</th><th>What happened</th><th>Hash</th></tr>${entries.map(e => `<tr><td>${esc(String(e.ts).replace('T', ' ').slice(0, 19))}</td><td>${esc(e.actor)}</td><td><b>${esc(String(e.event).replace(/_/g, ' '))}</b></td><td class="hash">${esc(String(e.hash).slice(0, 12))}…</td></tr>`).join('')}</table></section>`;
 }
 
-fetch('/api/trace/' + encodeURIComponent(pid)).then(async r => {
-  const b = await r.json().catch(() => ({}));
-  if (!r.ok) { $('title').textContent = 'No trace'; $('main').innerHTML = `<div class="error"><b>Nothing to trace.</b> ${esc(b.detail || 'Server answered ' + r.status)}</div>`; return; }
-  render(b);
-}).catch(e => { $('title').textContent = 'Could not load'; $('main').innerHTML = `<div class="error">${esc(e.message)}</div>`; });
+function load() {
+  $('main').innerHTML = '<div class="skel"></div>';
+  fetch('/api/trace/' + encodeURIComponent(pid)).then(async r => {
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) { $('title').textContent = 'No trace found'; $('main').innerHTML = `<div class="error"><b>Nothing to trace for ${esc(pid)}.</b> ${esc(String(b.detail || 'The server returned error ' + r.status).replace(/\.?$/, '.'))} Check the request id, or pick a dashboard from My dashboards. <button class="btn" onclick="load()">Try again</button></div>`; return; }
+    render(b);
+  }).catch(e => { $('title').textContent = 'Trace not available'; $('main').innerHTML = `<div class="error"><b>The trace could not be loaded.</b> The server did not answer (${esc(e.message)}). Check that the app is running, then try again. <button class="btn" onclick="load()">Try again</button></div>`; });
+}
+load();
 </script>
 </body>
 </html>

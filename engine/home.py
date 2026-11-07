@@ -9,6 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from .estate import load
+from .measures import direction
 
 LEVEL = {"green": 0, "amber": 1, "red": 2}
 TREND_MONTHS = 7
@@ -35,16 +36,16 @@ def home_data() -> dict:
     risk = so.assign(level=so.risk_status.map(LEVEL))
     red_n = int((risk.level == 2).sum())
     tiles = [
-        {"kpi": "On-time in full", "unit": "%", "direction": "higher_is_better", "level": 0, "status_basis": "none",
+        {"kpi": "On-time in full", "unit": "%", "direction": direction("On-time in full"), "level": 0, "status_basis": "none",
          "value": round(month_mean("otif_pct_syn", last), 1),
          "delta": round(month_mean("otif_pct_syn", last) - month_mean("otif_pct_syn", prev), 1)},
-        {"kpi": "Inventory coverage", "unit": "weeks", "direction": "higher_is_better", "level": 0, "status_basis": "none",
+        {"kpi": "Inventory coverage", "unit": "weeks", "direction": direction("Inventory coverage"), "level": 0, "status_basis": "none",
          "value": round(month_mean("inventory_weeks_syn", last), 1),
          "delta": round(month_mean("inventory_weeks_syn", last) - month_mean("inventory_weeks_syn", prev), 1)},
-        {"kpi": "Units shipped", "unit": "units", "direction": "higher_is_better", "level": 0, "status_basis": "none",
+        {"kpi": "Units shipped", "unit": "units", "direction": direction("Units shipped"), "level": 0, "status_basis": "none",
          "value": round(month_sum("units_shipped_syn", last)),
          "delta": round(month_sum("units_shipped_syn", last) - month_sum("units_shipped_syn", prev))},
-        {"kpi": "Routes at red risk", "unit": f"of {len(risk)}", "direction": "lower_is_better",
+        {"kpi": "Routes at red risk", "unit": f"of {len(risk)}", "direction": direction("Routes at red risk"),
          "level": 2 if red_n else 0, "status_basis": "pack risk_status", "value": red_n, "delta": 0},
     ]
 
@@ -70,7 +71,7 @@ def home_data() -> dict:
                  for m, v in zip(s.month.tail(TREND_MONTHS), s.otif_pct_syn.tail(TREND_MONTHS))]
         older = s[s.month < last].otif_pct_syn
         items.append({"line": f"{prod[r.product_id]} · {mk[r.market_id]}", "kpi": "On-time in full", "unit": "%",
-                      "value": round(float(r.otif_now), 1), "level": 2, "direction": "higher_is_better",
+                      "value": round(float(r.otif_now), 1), "level": 2, "direction": direction("On-time in full"),
                       "baseline": round(float(older.mean()), 1), "target": target, "trend": trend,
                       "supply_source": r.supply_source, "risk_status": r.risk_status})
 

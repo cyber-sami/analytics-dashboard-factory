@@ -3,143 +3,131 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard Factory Pipeline</title>
+<title>Analytics Dashboard Factory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,800;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/base.css">
 <style>
-  :root {
-    /* Own palette, inspired by the Bayer brand (blue + green). Not official Bayer colours. */
-    --navy: #0B2D3E; --brand-blue: #0068A8; --brand-green: #5DBB46; --bg: #F4F8FB; --teal: #0B2D3E; --cta: #C8003F;
-    --card: #fff; --ink: #0B2D3E; --muted: #35566A; --line: #D5E2EB;
-    --user: #00B3B8; --ai: #4DB8F5; --code: #5DBB46; --state: #0068A8;
-    --ok: #1a7f46; --warn: #0068A8; --alert: #C8003F;
-    --u: clamp(13px, 1vw, 22px);
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Figtree", system-ui, "Segoe UI", sans-serif; font-size: var(--u); }
-  header { background: linear-gradient(120deg, #0B2D3E 0%, #0068A8 60%, #00B3B8 100%); color: #fff; padding: 1.1em 2.4em; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1em; }
-  .hnav { display: flex; gap: .6em; flex-wrap: wrap; }
-  header h1 { margin: 0; font-size: 1.6em; letter-spacing: -.01em; }
-  header a { color: #fff; text-decoration: none; font-weight: 600; background: #ffffff2e; border-radius: 99em; padding: .5em 1.2em; }
-  header h1 { font-style: italic; font-weight: 800; }
-  .panel h2 { color: var(--teal); font-style: italic; font-weight: 800; }
+  /* Tokens, header, focus, skeleton and error styles live in /static/base.css. */
+  :root { --bar: #6B8798; }
   main { padding: 1.6em 2.4em 3em; }
 
-
   .stepper { display: grid; grid-template-columns: repeat(6, 1fr); gap: .6em; margin-bottom: 1.6em; }
-  .step { cursor: pointer; text-align: left; padding: .8em 1.1em; border-radius: 1em; background: var(--card); color: var(--muted); font: inherit; border: .06em solid var(--line); transition: .2s; }
-  .step b { display: block; font-size: 1.1em; }
-  .step small { color: var(--muted); }
+  .step { cursor: pointer; text-align: left; padding: 0 1.1em .8em; overflow: hidden; border-radius: 1em; background: var(--card); color: var(--muted); font: inherit; border: .06em solid var(--line); transition: .2s; }
+  .step b { display: block; }
+  .step .strip { display: block; height: .4em; margin: 0 -1.1em .7em; }
   .step.done { background: var(--navy); border-color: var(--navy); color: #fff; }
-  .step.done small { color: #ffffffcc; }
-  .step.active { background: #E8F3FA; color: var(--ink); border: .12em solid var(--brand-blue); }
-  .step:disabled { cursor: default; opacity: .6; }
+  .step.active { background: var(--mist); color: var(--ink); border: .12em solid var(--brand-blue); }
+  .step:disabled { cursor: default; background: transparent; border-style: dashed; }
 
   .panel { background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; padding: 1.6em 2em; min-height: 24em; }
-  .panel h2 { margin: 0 0 .2em; font-size: 1.8em; }
+  .panel h2 { margin: 0 0 .2em; font-size: var(--l); color: var(--navy); font-style: italic; }
+  .panel h2:focus { outline: none; }
   .panel h3 { margin: 1.2em 0 .4em; }
   .panel .sub { color: var(--muted); margin-bottom: 1.2em; }
+  .sub, .headline, .evrow, .quote, .policy, .prov, .small, .note { max-width: 65ch; }
   textarea, input, select { font: inherit; width: 100%; padding: .7em .9em; border: .1em solid var(--line); border-radius: .6em; background: #fff; color: var(--ink); }
   .dd { position: relative; }
   .ddbtn { font: inherit; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: .6em; text-align: left; padding: .7em .9em; border: .1em solid var(--line); border-radius: .6em; background: #fff; color: var(--ink); cursor: pointer; }
-  .ddbtn:hover { border-color: var(--brand-blue); } .ddbtn:focus-visible, .ddbtn[aria-expanded="true"] { outline: none; border-color: var(--navy); box-shadow: 0 0 0 .15em #0068A833; }
+  .ddbtn:hover { border-color: var(--brand-blue); } .ddbtn:focus-visible, .ddbtn[aria-expanded="true"] { border-color: var(--navy); box-shadow: 0 0 0 .15em #0068A833; }
   .ddlist { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + .25em); margin: 0; padding: .3em; list-style: none; max-height: 16em; overflow-y: auto; background: #fff; border: .1em solid var(--line); border-radius: .6em; box-shadow: 0 .5em 1.5em #0b2d3e22; }
   .ddlist[hidden] { display: none; }
-  .ddlist li { padding: .55em .7em; border-radius: .4em; cursor: pointer; } .ddlist li:hover, .ddlist li:focus { background: var(--mist); outline: none; } .ddlist li[aria-selected="true"] { font-weight: 800; color: var(--brand-blue); }
-  textarea { min-height: 5.5em; font-size: 1.2em; resize: vertical; }
-  label { display: block; font-weight: 700; margin: 1em 0 .3em; }
+  .ddlist li { padding: .55em .7em; border-radius: .4em; cursor: pointer; } .ddlist li:hover, .ddlist li:focus { background: var(--mist); } .ddlist li:focus-visible { outline-offset: -.18em; } .ddlist li[aria-selected="true"] { font-weight: 800; color: var(--brand-blue); }
+  textarea { min-height: 5.5em; font-size: var(--l); resize: vertical; }
+  label { display: block; font-weight: 800; margin: 1em 0 .3em; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
-  button.act { font: inherit; font-weight: 700; font-size: 1.15em; border: 0; border-radius: .75em; padding: .7em 1.6em; cursor: pointer; color: #fff; background: var(--brand-blue); }
-  button.act:disabled { opacity: .5; cursor: wait; }
-  a.act.mid { display: inline-block; text-decoration: none; font: inherit; font-weight: 700; font-size: 1.15em; border-radius: .75em; padding: .7em 1.6em; background: #fff; color: var(--brand-blue); border: .12em solid var(--brand-blue); }
-  .dlb { font: inherit; font-weight: 700; font-size: .8em; background: #fff; color: var(--brand-blue); border: .1em solid var(--brand-blue); border-radius: .6em; padding: .2em .8em; cursor: pointer; margin-left: .4em; }
+
+  /* One button family: .act is the primary, .mid the outlined secondary, .go the approval, .no the rejection, .sm the small one. */
+  .act { display: inline-block; text-decoration: none; font: inherit; font-weight: 800; border: 0; border-radius: .75em; padding: .7em 1.6em; cursor: pointer; color: #fff; background: var(--brand-blue); }
+  .act:disabled { opacity: .5; cursor: wait; }
+  .act.mid { background: #fff; color: var(--brand-blue); border: .12em solid var(--brand-blue); }
+  .act.go { background: var(--ok); }
+  .act.no { background: #fff; color: var(--alert); border: .12em solid var(--alert); }
+  .act.sm { font-size: var(--s); padding: .2em .8em; margin-left: .4em; border-radius: .6em; }
+  .nav .act:disabled { opacity: .4; cursor: default; }
   /* The whole row is the click target, not just the little arrow. */
   a.rv { display: grid; grid-template-columns: 1fr auto; gap: .3em 1em; padding: .8em .8em; margin: 0 -.8em; border-bottom: .06em solid var(--line); align-items: center; color: inherit; text-decoration: none; cursor: pointer; border-radius: .6em; }
-  a.rv:hover, a.rv:focus-visible { background: var(--mist); outline: none; } a.rv:last-child { border-bottom: 0; }
-  .rv small { color: var(--muted); display: block; } .rv .go { color: var(--brand-blue); font-weight: 700; white-space: nowrap; }
-  a.act.open { display: inline-block; text-decoration: none; font: inherit; font-weight: 700; font-size: 1.15em; border-radius: .75em; padding: .7em 1.6em; color: #fff; background: var(--cta); }
-  button.act.go { background: var(--ok); } button.act.mid { background: #fff; color: var(--brand-blue); border: .12em solid var(--brand-blue); }
-  button.act.no { background: #fff; color: var(--alert); border: .12em solid var(--alert); }
+  a.rv:hover, a.rv:focus-visible { background: var(--mist); } a.rv:focus-visible { outline-offset: -.18em; } a.rv:last-child { border-bottom: 0; }
+  .rv small { color: var(--muted); display: block; } .rv .go { color: var(--brand-blue); font-weight: 800; white-space: nowrap; }
   .btns { display: flex; gap: 1em; flex-wrap: wrap; margin: 1.2em 0; }
 
-  .quote { font-size: 1.4em; line-height: 1.4; padding: 1em 1.2em; border-left: .3em solid var(--user); background: #E8F3FA; border-radius: .5em; }
-  .q { background: #E8F3FA; border: .12em solid var(--brand-blue); border-radius: .8em; padding: .8em 1.1em; margin-bottom: .6em; font-weight: 700; }
-  .blocked { background: #fde4e7; border: .12em solid var(--alert); color: var(--alert); border-radius: .6em; padding: .8em 1.1em; font-weight: 700; margin: 1em 0; }
+  .quote { font-size: var(--l); line-height: 1.4; padding: 1em 1.2em; border-left: .3em solid var(--brand-blue); background: var(--mist); border-radius: .5em; }
+  .q { background: var(--mist); border: .12em solid var(--brand-blue); border-radius: .8em; padding: .8em 1.1em; margin-bottom: .6em; font-weight: 800; }
+  .blocked { background: #fde4e7; border: .12em solid var(--alert); color: var(--alert); border-radius: .6em; padding: .8em 1.1em; font-weight: 800; margin: 1em 0; }
   .chips { display: flex; flex-wrap: wrap; gap: .5em; align-items: center; }
-  .chip { background: #E8F3FA; color: var(--ink); font-weight: 700; padding: .3em .9em; border-radius: 99em; }
-  .rule { border: .1em solid var(--brand-blue); color: var(--brand-blue); border-radius: .5em; padding: .2em .7em; font-weight: 600; }
+  .chip { background: var(--mist); color: var(--ink); font-weight: 800; padding: .3em .9em; border-radius: 99em; }
+  .rule { border: .1em solid var(--brand-blue); color: var(--brand-blue); border-radius: .5em; padding: .2em .7em; }
+  .scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; margin: .6em 0 1em; }
   th, td { text-align: left; padding: .6em .8em; border-bottom: .1em solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-size: .9em; text-transform: uppercase; letter-spacing: .06em; }
-  tr.best td { background: #e3f6ea; font-weight: 700; }
+  th { color: var(--muted); font-size: var(--s); font-weight: 400; }
+  tr.best td { background: #e3f6ea; font-weight: 800; }
   td:last-child:has(.fit), th.num, td.num { text-align: right; white-space: nowrap; }
-  .fit { display: inline-block; height: .7em; background: var(--brand-green); border-radius: .4em; vertical-align: middle; margin-right: .5em; }
+  .fit { display: inline-block; height: .7em; background: var(--brand-blue); border-radius: .4em; vertical-align: middle; margin-right: .5em; }
   ul.ev { margin: 0 0 1em; padding-left: 1.3em; line-height: 1.6; }
-  .verdict { display: inline-block; font-size: 2.2em; font-weight: 800; letter-spacing: .06em; color: #fff; padding: .15em .7em; border-radius: .4em; }
-  .headline { font-size: 1.35em; margin: .7em 0 1em; line-height: 1.4; }
-  ol.actions { line-height: 1.7; font-size: 1.1em; padding-left: 1.3em; }
-  details { background: #E8F3FA; border-radius: .6em; padding: .7em 1em; margin-top: 1em; }
-  summary { cursor: pointer; font-weight: 700; color: var(--state); }
+  .headline { font-size: var(--l); margin: .7em 0 1em; line-height: 1.4; }
+  ol.actions { line-height: 1.7; padding-left: 1.3em; }
   .spec { border: .15em dashed var(--brand-blue); border-radius: .9em; padding: 1.2em 1.5em; background: var(--bg); }
-  .spec h3 { margin: 0 0 .2em; font-size: 1.4em; }
-  .spec .tag { display: inline-block; background: var(--warn); color: #fff; font-weight: 700; font-size: .85em; padding: .15em .8em; border-radius: 99em; vertical-align: middle; margin-left: .6em; }
+  .spec h3 { margin: 0 0 .2em; font-size: var(--l); }
+  .spec .tag { display: inline-block; background: var(--warn); color: #fff; font-weight: 800; font-size: var(--s); padding: .15em .8em; border-radius: 99em; vertical-align: middle; margin-left: .6em; }
   .spec .tag.ok { background: var(--ok); }
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(11em, 1fr)); gap: .7em; margin: 1em 0; }
-  .tiles div { background: #E8F3FA; border-radius: .6em; padding: .8em; font-weight: 700; }
+  .tiles div { background: var(--mist); border-radius: .6em; padding: .8em; font-weight: 800; }
   .tiles small { display: block; color: var(--muted); font-weight: 400; margin-top: .2em; }
   dl { display: grid; grid-template-columns: 11em 1fr; gap: .4em 1em; margin: .8em 0 0; } dt { color: var(--muted); } dd { margin: 0; }
-  .status { display: inline-block; font-size: 1.8em; font-weight: 800; color: #fff; padding: .15em .8em; border-radius: .4em; }
-  /* Layout from the Claude Design "Dashboard" page */
-  .policy { background: #e8f3fa; border-left: .3em solid var(--brand-blue); border-radius: .5em; padding: .7em 1em; margin: .4em 0 1em; line-height: 1.5; }
-  .evrow { background: #E8F3FA; border-radius: .75em; padding: .8em 1em; margin-bottom: .6em; line-height: 1.5; }
-  .lab2 { font-size: .9em; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 1.2em 0 .6em; }
+  .status { display: inline-block; font-size: var(--l); font-weight: 800; color: #fff; padding: .15em .8em; border-radius: .4em; }
+  .policy { background: var(--mist); border-left: .3em solid var(--brand-blue); border-radius: .5em; padding: .7em 1em; margin: .4em 0 1em; line-height: 1.5; }
+  .evrow { background: var(--mist); border-radius: .75em; padding: .8em 1em; margin-bottom: .6em; line-height: 1.5; }
+  .lab2 { font-size: var(--s); font-weight: 800; color: var(--muted); margin: 1.2em 0 .6em; }
   .recgrid { display: flex; flex-wrap: wrap; gap: 1.4em; align-items: stretch; }
   .rcard { background: #fff; border: .06em solid var(--line); border-radius: 1.25em; overflow: hidden; min-width: 0; }
   .recgrid .rcard:first-child { flex: 3 1 34em; } .recgrid .side { flex: 2 1 20em; padding: 1.4em 1.6em; }
   .band { padding: 1.4em 1.7em; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8em; }
   .prov { background: #fff9e0; border: .12em solid #b58900; border-radius: .6em; padding: .8em 1.1em; margin: .8em 0 1em; line-height: 1.5; } .prov a { color: var(--brand-blue); font-weight: 800; }
-  .band.provisional { opacity: .55; filter: saturate(.5); } .band.provisional .big::after { content: " ?"; }
-  .band .lab { font-size: .9em; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+  /* A provisional recommendation stays fully readable: a pale band with a dashed edge and a "?" instead of a faded one. */
+  .band.provisional { background: var(--mist); color: var(--ink); border-bottom: .15em dashed var(--brand-blue); } .band.provisional .big::after { content: " ?"; }
   .band .big { font-size: 2.8em; font-weight: 800; font-style: italic; line-height: 1.05; }
-  .band .req { background: #0B2D3E; color: #fff; border-radius: .9em; padding: .5em 1em; font-weight: 600; }
+  .band .req { background: var(--navy); color: #fff; border-radius: .9em; padding: .5em 1em; font-weight: 800; }
   .rbody { padding: .4em 1.7em 1.6em; }
-  .rbody .headline { font-size: 1.15em; margin: 1.2em 0 .2em; }
+  .rbody .headline { margin: 1.2em 0 .2em; }
   .side .lab2 { margin-top: 0; }
-  .barrow { display: grid; grid-template-columns: 7em minmax(0, 1fr) 2em; align-items: center; gap: .8em; margin-bottom: .8em; font-weight: 600; }
-  .track { height: 1.1em; border-radius: .6em; background: #E8F3FA; } .track i { display: block; height: 100%; border-radius: .6em; box-sizing: border-box; }
-  .small { font-size: .9em; color: var(--muted); }
+  .barrow { display: grid; grid-template-columns: 7em minmax(0, 1fr) 2em; align-items: center; gap: .8em; margin-bottom: .8em; }
+  .barrow > b:last-child { text-align: right; }
+  .track { height: 1.1em; border-radius: .6em; background: var(--mist); } .track i { display: block; height: 100%; border-radius: .6em; background: var(--bar); } .track i.cur { background: var(--brand-blue); }
+  .tight { margin-top: .5em; } .btns .spacer { flex: 1; }
   table.audit { min-width: 38em; } table.audit th { border-bottom: .12em solid var(--line); }
-  .pill { font-weight: 800; padding: .25em .7em; border-radius: 99em; font-size: .85em; white-space: nowrap; }
-  .hash { font-family: ui-monospace, monospace; font-size: .85em; color: var(--muted); }
-  .badge { display: inline-block; font-weight: 700; padding: .25em .9em; border-radius: 99em; color: #fff; margin-left: .6em; font-size: .85em; }
+  .pill { font-weight: 800; padding: .25em .7em; border-radius: 99em; font-size: var(--s); white-space: nowrap; background: #4DB8F5; color: var(--navy); }
+  .pill.rej { background: var(--alert); color: #fff; } .pill.ok { background: var(--brand-green); color: var(--navy); }
+  .pill.chg, .pill.new { background: #fff; color: var(--brand-blue); border: .12em solid var(--brand-blue); }
+  .hash { font-family: ui-monospace, monospace; font-size: var(--s); color: var(--muted); }
+  .badge { display: inline-block; font-weight: 800; padding: .25em .9em; border-radius: 99em; color: #fff; margin-left: .6em; font-size: var(--s); }
   .nav { display: flex; justify-content: space-between; margin-top: 1.2em; }
-  .nav button { font: inherit; font-weight: 700; padding: .6em 1.4em; border-radius: .6em; border: .1em solid var(--navy); background: #fff; color: var(--navy); cursor: pointer; }
-  .nav button.primary { background: var(--brand-blue); border-color: var(--brand-blue); color: #fff; }
-  .nav button:disabled { opacity: .35; cursor: default; }
-  .note { font-size: .85em; color: var(--muted); text-align: center; margin-top: 1em; }
-  @media (max-width: 800px) { .stepper { grid-template-columns: repeat(2, 1fr); } .row { grid-template-columns: 1fr; } dl { grid-template-columns: 1fr; } main, header { padding-inline: 1em; } th, td { padding: .5em .4em; font-size: .85em; } .panel { padding: 1.2em 1em; } }
+  .note { color: var(--muted); font-size: var(--s); margin-top: 1.4em; }
+  @media (max-width: 1000px) { .stepper { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px) { .stepper { grid-template-columns: repeat(2, 1fr); } .row { grid-template-columns: 1fr; } dl { grid-template-columns: 1fr; } main, header { padding-inline: 1em; } th, td { padding: .5em .4em; font-size: var(--s); } .panel { padding: 1.2em 1em; } }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header>
   <h1>Analytics Dashboard Factory</h1>
-  <nav class="hnav"><a href="/my-dashboards">My dashboards</a><a href="/">← Supply operations overview</a></nav>
+  <nav aria-label="Pages"><a href="/my-dashboards">My dashboards</a><a href="/">Supply operations overview</a></nav>
 </header>
-<main>
+<main id="main">
   <div class="stepper" id="stepper"></div>
   <div class="panel" id="panel"></div>
-  <div class="nav"><button id="prev">← Back</button><button id="next" class="primary">Next →</button></div>
-  <div class="note">Live: every request, decision and audit entry comes from the recommendation engine. Use ← → keys to move.</div>
+  <div class="nav"><button id="prev" class="act mid">Back</button><button id="next" class="act mid">Next</button></div>
+  <p class="note">About this prototype: every request, decision and audit entry comes from the recommendation engine. The approver and owner pickers stand in for single sign-on: in production the approver is the signed-in user, and the person named as accountable owner has to confirm they accept. The review period is our assumption, not Bayer policy. The arrow keys move between steps.</p>
 </main>
 <script>
-// Verdict colours from the Claude Design palette: green = less to build, crimson = retire.
+// Verdict colours from the Claude Design palette. Green is least to build; red is kept for blocked and rejected, so Retire is slate.
 const VERDICT = {
-  REUSE:       { label: 'Reuse',       bg: '#5DBB46', fg: '#0B2D3E', band: 'linear-gradient(120deg,#5DBB46 0%,#00B3B8 100%)', bfg: '#0B2D3E' },
-  EXTEND:      { label: 'Extend',      bg: '#00B3B8', fg: '#0B2D3E', band: 'linear-gradient(120deg,#00B3B8 0%,#4DB8F5 100%)', bfg: '#0B2D3E' },
-  CONSOLIDATE: { label: 'Consolidate', bg: '#4DB8F5', fg: '#0B2D3E', band: 'linear-gradient(120deg,#4DB8F5 0%,#0091DF 100%)', bfg: '#0B2D3E' },
-  MIGRATE:     { label: 'Migrate',     bg: '#0B2D3E', fg: '#fff',    band: 'linear-gradient(120deg,#0B2D3E 0%,#0068A8 100%)', bfg: '#fff' },
-  RETIRE:      { label: 'Retire',      bg: '#C8003F', fg: '#fff',    band: 'linear-gradient(120deg,#C8003F 0%,#E6004D 100%)', bfg: '#fff' },
-  NEW_BUILD:   { label: 'Build new',   bg: '#fff',    fg: '#0068A8', band: 'linear-gradient(120deg,#0068A8 0%,#0091DF 100%)', bfg: '#fff', outline: true }
+  REUSE:       { label: 'Reuse',       band: 'linear-gradient(120deg,#5DBB46 0%,#00B3B8 100%)', bfg: '#0B2D3E' },
+  EXTEND:      { label: 'Extend',      band: 'linear-gradient(120deg,#00B3B8 0%,#4DB8F5 100%)', bfg: '#0B2D3E' },
+  CONSOLIDATE: { label: 'Consolidate', band: 'linear-gradient(120deg,#4DB8F5 0%,#8AD0F7 100%)', bfg: '#0B2D3E' },
+  MIGRATE:     { label: 'Migrate',     band: 'linear-gradient(120deg,#0B2D3E 0%,#0068A8 100%)', bfg: '#fff' },
+  RETIRE:      { label: 'Retire',      band: 'linear-gradient(120deg,#4A5A66 0%,#2F3E48 100%)', bfg: '#fff' },
+  NEW_BUILD:   { label: 'Build new',   band: 'linear-gradient(120deg,#0068A8 0%,#005A94 100%)', bfg: '#fff' }
 };
 // One plain line from the engine's change_policy: what happens to existing assets (non-destructive by default).
 function policyLine(cp) {
@@ -155,8 +143,8 @@ function intentView(it) {
   if (!it || typeof it === 'string') return `<div>${esc(it || '')}</div>`;
   const known = [...(it.products || []), ...(it.markets || []), ...(it.metrics || [])];
   return `<div class="chips">${known.map(x => `<span class="chip">${esc(x)}</span>`).join('') || '<span class="small">Nothing specific yet</span>'}</div>
-    ${(it.corrections || []).length ? `<div class="small" style="margin-top:.5em">${it.corrections.map(c => `Read “${esc(c.from)}” as ${esc(c.to)}`).join(' · ')}. Tell us if that is wrong.</div>` : ''}
-    ${(it.new_measures || []).length ? `<div class="lab2">No governed KPI exists yet for</div><div class="chips">${it.new_measures.map(x => `<span class="pill" style="background:#fff;color:#0068A8;border:2px solid #0068A8">${esc(x)}</span>`).join('')}</div>` : ''}`;
+    ${(it.corrections || []).length ? `<div class="small tight">${it.corrections.map(c => `Read “${esc(c.from)}” as ${esc(c.to)}`).join('. ')}. Tell us if that is wrong.</div>` : ''}
+    ${(it.new_measures || []).length ? `<div class="lab2">No governed KPI exists yet for</div><div class="chips">${it.new_measures.map(x => `<span class="pill new">${esc(x)}</span>`).join('')}</div>` : ''}`;
 }
 // A RETIRE approval archives an asset; nothing is built, so there is no dashboard to open.
 function retirePanel() {
@@ -165,7 +153,7 @@ function retirePanel() {
   return `<div class="spec"><h3>Retirement approved</h3>
     <div class="evrow">Asset to archive: <b>${esc(s.target_asset || 'the asset named in the recommendation')}</b></div>
     ${todo.length ? `<div class="lab2">Still to do</div><ol class="actions">${todo.map(a => `<li>${esc(a.text)}${a.who_name ? ' <span class="small">(' + esc(a.who_name) + ')</span>' : ''}</li>`).join('')}</ol>` : ''}
-    ${done.length ? `<p class="small" style="margin:.5em 0">Done: ${done.map(a => esc(a.text)).join(' · ')}</p>` : ''}
+    ${done.length ? `<p class="small tight">Done: ${done.map(a => esc(a.text)).join('; ')}</p>` : ''}
     <p class="headline">No dashboard is built: the best dashboard is the one you don't build.</p></div>`;
 }
 // "Needs review": dashboards built through the factory, ordered by what needs attention (engine: /api/lifecycle).
@@ -175,13 +163,15 @@ function reviewHtml() {
   const rows = lifecycle.filter(x => (x.warnings || []).length || x.state !== 'active').slice(0, 4);
   const queue = pending.slice(0, 4);
   const q = queue.length ? `<h3>Waiting for approval</h3><div class="small">Requests that have a recommendation but no decision yet. An approver can pick one up here.</div>
-    ${queue.map(p => `<a class="rv" href="#" onclick="openProposal('${esc(p.proposal_id)}');return false"><span><b>${esc(p.spec.title)}</b><small>asked by ${esc(p.requester)} · ${esc(String(p.created).slice(0, 16).replace('T', ' '))} UTC · ${esc(String(p.recommendation.verdict).replace('_', ' '))}${(p.recommendation.clarify || []).length ? ' · has open questions' : ''}</small></span><span class="go">Open →</span></a>`).join('')}` : '';
-  const r = rows.length ? `<h3>Needs review</h3><div class="small">Dashboards approved here, most urgent first. Review period is our assumption, not Bayer policy.</div>
-    ${rows.map(x => `<a class="rv" href="/trace/${encodeURIComponent(x.proposal_id)}" target="_blank" rel="noopener"><span><b>${esc(x.title)}</b><small>${esc(x.state)} · review due ${esc(x.review_due)} · ${(x.warnings || []).length} warning${(x.warnings || []).length === 1 ? '' : 's'}${x.warnings?.[0] ? ': ' + esc(x.warnings[0]) : ''}</small></span><span class="go">Trace →</span></a>`).join('')}` : '';
-  return q + r;
+    ${queue.map(p => `<a class="rv" href="#" onclick="openProposal('${esc(p.proposal_id)}');return false"><span><b>${esc(p.spec.title)}</b><small>Asked by ${esc(p.requester)}, ${esc(String(p.created).slice(0, 16).replace('T', ' '))} UTC</small><small>${esc((VERDICT[p.recommendation.verdict] || {}).label || p.recommendation.verdict)}${(p.recommendation.clarify || []).length ? ', has open questions' : ''}</small></span><span class="go">Open</span></a>`).join('')}` : '';
+  const r = rows.length ? `<h3>Needs review</h3><div class="small">Dashboards approved here, most urgent first.</div>
+    ${rows.map(x => `<a class="rv" href="/trace/${encodeURIComponent(x.proposal_id)}" target="_blank" rel="noopener"><span><b>${esc(x.title)}</b><small>${esc(sentence(x.state))}, review due ${esc(x.review_due)}</small><small>${(x.warnings || []).length} warning${(x.warnings || []).length === 1 ? '' : 's'}${x.warnings?.[0] ? ': ' + esc(x.warnings[0]) : ''}</small></span><span class="go">Trace</span></a>`).join('')}` : '';
+  return (reviewFailed ? '<div class="blocked" role="alert">The waiting and review lists could not be loaded. <a href="#" onclick="loadReview();return false">Try again</a></div>' : '') + q + r;
 }
+let reviewFailed = false;
 function loadReview() {
-  Promise.all([api('/api/lifecycle').catch(() => []), api('/api/proposals').catch(() => [])]).then(([lc, ps]) => {
+  reviewFailed = false; // a failed list says so instead of silently disappearing
+  Promise.all([api('/api/lifecycle').catch(() => { reviewFailed = true; return []; }), api('/api/proposals').catch(() => { reviewFailed = true; return []; })]).then(([lc, ps]) => {
     lifecycle = lc; allProps = ps.length ? ps : allProps;
     pending = ps.filter(p => p.status === 'pending_approval').sort((a, b) => String(b.created).localeCompare(String(a.created)));
     const el = $('review'); if (el) el.innerHTML = reviewHtml();
@@ -236,42 +226,38 @@ addEventListener('keydown', e => { // arrows, Enter, Escape and type-to-jump ins
 function newRequest() { store.del('dfCurrent'); pick = {}; prop = null; request = ''; audit = null; blockMsg = ''; errMsg = ''; go(0); loadReview(); }
 const VERBS = { approve: 'Approved', reject: 'Rejected', request_changes: 'Changes requested' };
 const evRows = arr => (arr || []).map(e => `<div class="evrow">${esc(e)}</div>`).join('');
-const actionPill = ev => { const k = String(ev), s = /reject/.test(k) ? 'background:#C8003F;color:#fff' : /approv/.test(k) ? 'background:#5DBB46;color:#0B2D3E' : /change/.test(k) ? 'background:#fff;color:#0068A8;border:2px solid #0068A8' : 'background:#4DB8F5;color:#0B2D3E';
-  return `<span class="pill" style="${s}">${esc(k.replace(/_/g, ' ').toUpperCase())}</span>`; };
-const STEPS = [
-  { name: 'Ask', sub: 'You describe it', c: 'var(--user)' },
-  { name: 'Clarify', sub: 'What we understood', c: 'var(--ai)' },
-  { name: 'Evidence', sub: 'Does it already exist?', c: 'var(--code)' },
-  { name: 'Recommend', sub: 'Reuse before build', c: 'var(--ai)' },
-  { name: 'Preview', sub: 'The draft spec', c: 'var(--code)' },
-  { name: 'Approve', sub: 'A human decides', c: 'var(--user)' }
-];
+const actionPill = ev => { const k = String(ev), c = /reject/.test(k) ? 'rej' : /approv/.test(k) ? 'ok' : /change/.test(k) ? 'chg' : '';
+  return `<span class="pill ${c}">${esc(sentence(k))}</span>`; };
+const STEPS = ['Ask', 'Clarify', 'Evidence', 'Recommend', 'Preview', 'Approve'];
+const STEP_COL = ['#00B3B8', '#4DB8F5', '#5DBB46', '#4DB8F5', '#5DBB46', '#00B3B8']; // one colour per step, as a strip on top of its button
 // Small helpers for localStorage (may be blocked): the requester's name (shared with My dashboards) and the current proposal.
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
-let cur = 0, request = '', requester = store.get('dfName') || 'Jessica', prop = null, allProps = [], approvers = [], audit = null, busy = false, errMsg = '', blockMsg = '';
+let cur = 0, request = '', requester = store.get('dfName') || 'Guest', prop = null, allProps = [], approvers = [], audit = null, busy = false, errMsg = '', blockMsg = '', cmtText = '', confirmReject = false;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sentence = s => { const t = String(s ?? '').replace(/_/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
 const reached = () => prop ? STEPS.length - 1 : 0;
 
 async function api(path, opts) {
   const r = await fetch(path, opts && { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(opts) });
   const body = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(body.detail || ('Server answered ' + r.status)), { status: r.status });
+  if (!r.ok) throw Object.assign(new Error(body.detail || ('error ' + r.status)), { status: r.status });
   return body;
 }
 
 function render() {
-  $('stepper').innerHTML = STEPS.map((s, i) => `<button class="step ${i === cur ? 'active' : i < cur ? 'done' : ''}" style="--c:${s.c}" ${i > reached() ? 'disabled' : ''} onclick="go(${i})"><b>${i + 1}. ${s.name}</b><small>${s.sub}</small></button>`).join('');
+  $('stepper').innerHTML = STEPS.map((name, i) => `<button class="step ${i === cur ? 'active' : i < cur ? 'done' : ''}" ${i === cur ? 'aria-current="step"' : ''} ${i > reached() ? 'disabled' : ''} onclick="go(${i})"><i class="strip" style="background:${i > reached() ? '#D5E2EB' : STEP_COL[i]}"></i><b>${i + 1}. ${name}</b></button>`).join('');
   $('panel').innerHTML = VIEWS[cur]();
   $('prev').disabled = cur === 0; $('next').disabled = cur >= reached();
 }
-const go = i => { if (i > reached()) return; cur = Math.max(0, Math.min(STEPS.length - 1, i)); render(); if (cur === 5) loadAudit(); };
+// Changing step replaces the whole panel, so focus moves to the new heading (unless quiet, as on first load).
+const go = (i, quiet) => { if (i > reached()) return; confirmReject = false; cur = Math.max(0, Math.min(STEPS.length - 1, i)); render(); if (!quiet) $('panel').querySelector('h2')?.focus(); if (cur === 5) loadAudit(); };
 $('prev').onclick = () => go(cur - 1); $('next').onclick = () => go(cur + 1);
 addEventListener('keydown', e => { if (e.target.matches('textarea,input,select') || e.target.closest('.dd')) return; if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1); });
 
 async function ask(extra) {
   const ta = $('req'); if (ta) request = ta.value;
-  const who = $('who'); if (who) { requester = who.value || 'Jessica'; store.set('dfName', who.value.trim()); }
+  const who = $('who'); if (who) { requester = who.value || 'Guest'; store.set('dfName', who.value.trim()); }
   if (!request.trim()) { errMsg = 'Please write your request first.'; render(); return; }
   // A clarifying answer is sent as its own field; the engine rebuilds the request (never append it ourselves).
   const answering = extra && extra.trim() && prop ? { answer: extra.trim(), previous_proposal_id: prop.proposal_id } : {};
@@ -280,11 +266,15 @@ async function ask(extra) {
     prop = await api('/api/proposals', { text: request, requester, use_llm: true, ...answering }); pick = {}; store.set('dfCurrent', prop.proposal_id);
     request = prop.recommendation.intent?.raw || request; // shows the rebuilt text, e.g. "Net sales for Kerendia in Germany"
     audit = null; allProps = await api('/api/proposals').catch(() => [prop]); busy = false; go(prop.recommendation.clarify?.length ? 1 : 3);
-  } catch (e) { busy = false; errMsg = 'Could not reach the recommendation engine: ' + e.message; render(); }
+  } catch (e) { busy = false;
+    errMsg = e.status ? `The engine could not process this request (${e.message}). Check the wording and try again.` : `The recommendation engine did not answer (${e.message}). Check that the app is running, then try again.`; render(); }
 }
 
+// Rejecting takes a second click, kept apart from Approve. The comment is kept while the panel redraws.
+function setReject(v) { const c = $('cmt'); if (c) cmtText = c.value; confirmReject = v; render(); document.querySelector('.btns .act.no')?.focus(); }
 async function decide(decision) {
   const body = { proposal_id: prop.proposal_id, decision, approver_id: $('apr').value, comment: $('cmt').value, accountable_owner_id: $('own').value || null };
+  confirmReject = false; cmtText = '';
   blockMsg = ''; busy = true;
   try { prop = await api('/api/approve', body); store.set('dfCurrent', prop.proposal_id); } catch (e) { blockMsg = e.message; }
   busy = false; await loadAudit();
@@ -299,53 +289,53 @@ const chips = (arr, cls) => `<div class="chips">${arr.map(x => `<span class="${c
 const ruleChips = r => chips(Object.entries(r || {}).map(([k, v]) => `${k} ${v}`), 'rule');
 
 const VIEWS = [
-  () => `<h2>1. Ask</h2><div class="sub">Anyone can ask in their own words. No technical terms needed.</div>
+  () => `<h2 tabindex="-1">Ask</h2><div class="sub">Anyone can ask in their own words. No technical terms needed.</div>
     <label for="req">What would you like to see?</label>
     <textarea id="req" placeholder="e.g. A dashboard of net sales and forecast variance for Kerendia">${esc(request)}</textarea>
-    <div class="row"><div><label for="who">Your name</label><input id="who" value="${esc(requester)}" oninput="requester = this.value || 'Jessica'; store.set('dfName', this.value.trim())"></div><div></div></div>
-    ${errMsg ? `<div class="blocked">${esc(errMsg)}</div>` : ''}
-    <div class="btns"><button class="act" ${busy ? 'disabled' : ''} onclick="ask()">${busy ? 'Thinking…' : 'Ask the factory →'}</button></div>
+    <div class="row"><div><label for="who">Your name</label><input id="who" value="${esc(requester)}" oninput="requester = this.value || 'Guest'; store.set('dfName', this.value.trim())"></div><div></div></div>
+    ${errMsg ? `<div class="blocked" role="alert">${esc(errMsg)}</div>` : ''}
+    <div class="btns"><button class="act" ${busy ? 'disabled' : ''} onclick="ask()">${busy ? 'Thinking…' : 'Ask the factory'}</button></div>
     <div id="review">${reviewHtml()}</div>`,
 
   () => { const r = prop.recommendation, cl = r.clarify || [];
-    return `<h2>2. Clarify</h2><div class="sub">The factory repeats back what it understood, and asks when something is unclear.</div>
+    return `<h2 tabindex="-1">Clarify</h2><div class="sub">We repeat back what we understood, and ask when something is unclear.</div>
     <div class="quote">“${esc(request)}”</div>
     ${cl.length ? `<h3>Before this can go further, we need to know:</h3>${cl.map(q => `<div class="q">${esc(q)}</div>`).join('')}
       <div class="blocked">Approval is blocked until these questions are answered.</div>
       <label for="more">Your answer</label><textarea id="more" placeholder="Add details here"></textarea>
       <div class="btns"><button class="act" ${busy ? 'disabled' : ''} onclick="ask($('more').value)">${busy ? 'Thinking…' : 'Answer and ask again'}</button></div>`
       : `<h3>Understood, no questions needed.</h3>`}
-    <h3>I understood:</h3>${intentView(r.intent)}`; },
+    <h3>What we understood</h3>${intentView(r.intent)}`; },
 
   () => { const r = prop.recommendation;
-    return `<h2>3. Evidence</h2><div class="sub">Before building anything, we check what Bayer already has. Fixed code, so the same question always gives the same answer.</div>
-    <table><tr><th>Existing dashboard</th><th>Tool</th><th>Endorsed</th><th class="num">How well it fits</th></tr>
-    ${(r.candidates || []).map((c, i) => `<tr class="${i === 0 ? 'best' : ''}"><td>${esc(c.name)}<br><small style="color:var(--muted)">${esc(c.asset_id)} · ${esc(c.status)}</small></td><td>${esc(c.platform)}</td><td>${esc(c.endorsement)}</td><td><span class="fit" style="width:${c.fit * 4}em"></span>${Math.round(c.fit * 100)}%</td></tr>`).join('')}</table>
+    return `<h2 tabindex="-1">Evidence</h2><div class="sub">Before building anything, we check what Bayer already has. The checks are fixed rules, so the same question always gets the same answer.</div>
+    <div class="scroll"><table><tr><th>Existing dashboard</th><th>Tool</th><th>Endorsed</th><th class="num">How well it fits</th></tr>
+    ${(r.candidates || []).map((c, i) => `<tr class="${i === 0 ? 'best' : ''}"><td>${esc(c.name)}<br><small class="small">${esc(c.asset_id)}, ${esc(c.status)}</small></td><td>${esc(c.platform)}</td><td>${esc(c.endorsement)}</td><td><span class="fit" style="width:${c.fit * 4}em"></span>${Math.round(c.fit * 100)}%</td></tr>`).join('')}</table></div>
     <h3>What we found</h3>${evRows(r.evidence) || '<div class="evrow">No existing dashboard matches.</div>'}
-    <h3>KPIs asked for</h3><table><tr><th>KPI</th><th>Approved definition</th><th>Owner</th><th class="num">Conflicts</th></tr>
-    ${(r.kpis || []).map(k => `<tr><td>${esc(k.metric)}</td><td>${k.approved ? '✓ ' : '✕ '}${esc(k.canonical_kpi || 'none')}</td><td>${esc(k.owner || '–')}</td><td class="num">${(k.conflicting_variants || []).length ? '▲ ' + k.conflicting_variants.length + ' variants' : '–'}</td></tr>`).join('')}</table>
+    <h3>KPIs asked for</h3><div class="scroll"><table><tr><th>KPI</th><th>Approved definition</th><th>Owner</th><th class="num">Conflicts</th></tr>
+    ${(r.kpis || []).map(k => `<tr><td>${esc(k.metric)}</td><td>${k.approved ? '✓ ' : '✕ '}${esc(k.canonical_kpi || 'none')}</td><td>${esc(k.owner || '–')}</td><td class="num">${(k.conflicting_variants || []).length ? '⚠ ' + k.conflicting_variants.length + ' variants' : '–'}</td></tr>`).join('')}</table></div>
     <h3>Rules applied</h3>${ruleChips(r.rules_cited)}`; },
 
-  () => { const r = prop.recommendation, v = VERDICT[r.verdict] || VERDICT.NEW_BUILD;
+  () => { const r = prop.recommendation, v = VERDICT[r.verdict] || VERDICT.NEW_BUILD, open = (r.clarify || []).length;
     const counts = Object.fromEntries(Object.keys(VERDICT).map(k => [k, allProps.filter(p => p.recommendation.verdict === k && p.status !== 'superseded').length]));
     const max = Math.max(1, ...Object.values(counts));
-    return `<h2>4. Recommendation</h2><div class="sub">Reuse, extend, consolidate, migrate, retire or build new, always with the reason.</div>
-    ${(r.clarify || []).length ? `<div class="prov"><b>Provisional:</b> this is the engine's best guess so far. ${r.clarify.length} question${r.clarify.length === 1 ? ' is' : 's are'} still open, so it can't be approved yet. <a href="#" onclick="go(1);return false">Answer ${r.clarify.length === 1 ? 'it' : 'them'} →</a></div>` : ''}
+    return `<h2 tabindex="-1">Recommendation</h2><div class="sub">Reuse, extend, consolidate, migrate, retire or build new, always with the reason.</div>
+    ${open ? `<div class="prov"><b>Provisional:</b> this is the engine's best guess so far. ${open} question${open === 1 ? ' is' : 's are'} still open, so it can't be approved yet. <a href="#" onclick="go(1);return false">Answer ${open === 1 ? 'it' : 'them'}</a></div>` : ''}
     <div class="recgrid"><div class="rcard">
-      <div class="band${(r.clarify || []).length ? ' provisional' : ''}" style="background:${v.band};color:${v.bfg}"><div><div class="lab">${(r.clarify || []).length ? 'Provisional recommendation' : 'Recommendation'}</div><div class="big">${esc(r.verdict.replace('_', ' '))}</div></div><div class="req">${esc(prop.proposal_id)}</div></div>
+      <div class="band${open ? ' provisional' : ''}"${open ? '' : ` style="background:${v.band};color:${v.bfg}"`}><div><div>${open ? 'Provisional recommendation' : 'Recommendation'}</div><div class="big">${esc(v.label)}</div></div><div class="req">${esc(prop.proposal_id)}</div></div>
       <div class="rbody"><p class="headline">${esc(r.headline)}</p>
-        ${policyLine(r.change_policy) ? `<div class="policy">🛡 <b>Non-destructive:</b> ${esc(policyLine(r.change_policy))}</div>` : ''}
+        ${policyLine(r.change_policy) ? `<div class="policy"><b>Non-destructive:</b> ${esc(policyLine(r.change_policy))}</div>` : ''}
         <div class="lab2">Evidence cited</div>${evRows(r.evidence)}
         ${(r.actions || []).length ? `<div class="lab2">What a person should do next</div><ol class="actions">${r.actions.map(a => `<li>${esc(a)}</li>`).join('')}</ol>` : ''}
         <div class="lab2">Rules applied</div>${ruleChips(r.rules_cited)}
-        <div class="btns"><button class="act" onclick="go(4)">See the draft spec →</button></div></div></div>
+        <div class="btns"><button class="act" onclick="go(4)">See the draft spec</button></div></div></div>
       <aside class="rcard side"><div class="lab2">Outcomes across all requests</div>
-        ${Object.entries(VERDICT).sort((a, b) => counts[b[0]] - counts[a[0]]).map(([k, x]) => `<div class="barrow"><span>${x.label}</span><div class="track"><i style="width:${counts[k] / max * 100}%;background:${x.bg};${x.outline ? 'border:2px solid #0068A8' : ''}"></i></div><b>${counts[k]}</b></div>`).join('')}
-        <p class="small">Live counts of every request made on this machine.</p></aside></div>`; },
+        ${Object.entries(VERDICT).sort((a, b) => counts[b[0]] - counts[a[0]]).map(([k, x]) => `<div class="barrow"><span>${k === r.verdict ? `<b>${x.label}</b>` : x.label}</span><div class="track"><i class="${k === r.verdict ? 'cur' : ''}" style="width:${counts[k] / max * 100}%"></i></div><b>${counts[k]}</b></div>`).join('')}
+        <p class="small">Counts all requests made so far. This request's outcome is in bold and blue.</p></aside></div>`; },
 
   () => { const s = prop.spec, p = s.preview || {};
-    return `<h2>5. Preview</h2><div class="sub">The draft the approver signs off. Nothing is built until a person says yes.${prop.recommendation.verdict === 'RETIRE' ? (prop.status === 'approved' ? ' Retirement approved: no dashboard is built.' : ' After approval the asset is archived. No dashboard is built.')
-      : prop.status === 'approved' ? ` <a href="/dashboard/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Open the generated dashboard →</a>` : ' After approval, this becomes a live dashboard.'}</div>
+    return `<h2 tabindex="-1">Preview</h2><div class="sub">The draft the approver signs off. Nothing is built until a person says yes.${prop.recommendation.verdict === 'RETIRE' ? (prop.status === 'approved' ? ' Retirement approved: no dashboard is built.' : ' After approval the asset is archived. No dashboard is built.')
+      : prop.status === 'approved' ? ` <a href="/dashboard/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Open dashboard</a>` : ' After approval, this becomes a live dashboard.'}</div>
     <div class="spec"><h3>${esc(s.title)}<span class="tag ${s.status === 'approved' ? 'ok' : ''}">${esc(s.status)}</span></h3>
     <div class="chips"><span class="chip">${esc(String(s.action).replace('_', ' '))}</span>${s.scope ? `<span class="chip">${esc(typeof s.scope === 'string' ? s.scope : JSON.stringify(s.scope))}</span>` : ''}</div>
     <div class="tiles">${(s.kpis || []).map(k => `<div>${esc(typeof k === 'string' ? k : k.metric || k.name || JSON.stringify(k))}<small>KPI tile</small></div>`).join('')}</div>
@@ -358,24 +348,23 @@ const VIEWS = [
 
   () => { const decided = prop.decision, st = prop.status, open = (prop.recommendation.clarify || []).length;
     const stCol = st === 'approved' ? 'var(--ok)' : st === 'pending_approval' ? 'var(--warn)' : 'var(--alert)';
-    return `<h2>6. Approve</h2><div class="sub">Nothing goes live until an accountable person says yes. Every step is written to a tamper-evident audit log.</div>
-    <span class="status" style="background:${stCol}">${esc(st.replace('_', ' ').toUpperCase())}</span>
+    return `<h2 tabindex="-1">Approve</h2><div class="sub">Nothing goes live until an accountable person says yes. Every step is written to a tamper-evident audit log.</div>
+    <span class="status" style="background:${stCol}">${esc(sentence(st))}</span>
     ${st === 'pending_approval' ? `
       ${open ? '<div class="blocked">This request has open questions, so approval will be refused. Answer them in step 2.</div>' : ''}
-      <div class="row"><div><label id="lbl-apr">Who is deciding?</label>${dd('apr', approvers.map(a => ({ v: a.owner_id, t: a.owner_name + ' · ' + a.role })), pick.apr ?? approvers[0]?.owner_id ?? '', 'Choose a person')}</div>
-      <div><label id="lbl-own">Accountable owner (required)</label>${dd('own', [{ v: '', t: '— choose a person —' }, ...approvers.map(a => ({ v: a.owner_id, t: a.owner_name + ' · ' + a.role }))], pick.own ?? approvers[1]?.owner_id ?? '', '— choose a person —')}</div></div>
-      <p class="small" style="margin:.8em 0 0">Demo stand-in: in production the approver is the signed-in user (single sign-on), and the person named as accountable owner has to confirm they accept.</p>
-      <label for="cmt">Comment${' (required to reject or send back)'}</label><input id="cmt">
-      ${blockMsg ? `<div class="blocked">✕ Blocked: ${esc(blockMsg)}</div>` : ''}
-      <div class="btns"><button class="act go" onclick="decide('approve')">✓ Approve</button><button class="act mid" onclick="decide('request_changes')">Request changes</button><button class="act no" onclick="decide('reject')">Reject</button></div>`
-      : `<p class="headline">${esc(VERBS[decided?.decision] || st)} by <b>${esc(decided?.name || decided?.approver_id || '')}</b>${decided?.role ? ', ' + esc(decided.role) : ''}${decided?.comment ? ' · “' + esc(decided.comment) + '”' : ''}</p>
+      <div class="row"><div><label id="lbl-apr">Who is deciding?</label>${dd('apr', approvers.map(a => ({ v: a.owner_id, t: a.owner_name + ', ' + a.role })), pick.apr ?? approvers[0]?.owner_id ?? '', 'Choose a person')}</div>
+      <div><label id="lbl-own">Accountable owner (required)</label>${dd('own', [{ v: '', t: '— choose a person —' }, ...approvers.map(a => ({ v: a.owner_id, t: a.owner_name + ', ' + a.role }))], pick.own ?? approvers[1]?.owner_id ?? '', '— choose a person —')}</div></div>
+      <label for="cmt">Comment (required to reject or request changes)</label><input id="cmt" value="${esc(cmtText)}" oninput="cmtText = this.value">
+      ${blockMsg ? `<div class="blocked" role="alert">✕ Blocked: ${esc(blockMsg)}</div>` : ''}
+      <div class="btns"><button class="act go" onclick="decide('approve')">✓ Approve</button><button class="act mid" onclick="decide('request_changes')">Request changes</button><span class="spacer"></span>${confirmReject ? `<span class="small">Reject this request?</span><button class="act no" onclick="decide('reject')">Yes, reject</button><button class="act mid" onclick="setReject(false)">Cancel</button>` : `<button class="act no" onclick="setReject(true)">Reject</button>`}</div>`
+      : `<p class="headline">${esc(VERBS[decided?.decision] || sentence(st))} by <b>${esc(decided?.name || decided?.approver_id || '')}</b>${decided?.role ? ', ' + esc(decided.role) : ''}.${decided?.comment ? ' Comment: “' + esc(decided.comment) + '”' : ''}</p>
         ${decided?.accountable_owner ? `<div class="evrow">Accountable owner of this asset: <b>${esc(decided.accountable_owner)}</b></div>` : ''}
         <div class="evrow">Spec status: <b>${esc(prop.spec.status)}</b></div>
-        ${prop.status === 'approved' ? '<div class="evrow">✓ Saved to My dashboards, so it is still there after a refresh. <a href="/my-dashboards">Open My dashboards →</a></div>' : ''}
+        ${prop.status === 'approved' ? '<div class="evrow">✓ Saved to My dashboards, so it is still there after a refresh. <a href="/my-dashboards">Open My dashboards</a></div>' : ''}
         ${prop.recommendation.verdict === 'RETIRE' && prop.status === 'approved' ? retirePanel() : ''}
-        <div class="btns">${prop.status === 'approved' && prop.recommendation.verdict !== 'RETIRE' ? `<a class="act open" href="/dashboard/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Open the generated dashboard →</a>` : ''}${prop.status === 'approved' ? `<a class="act mid" href="/trace/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Trace this decision →</a>` : ''}<button class="act mid" onclick="newRequest()">Start a new request</button><button class="act mid" onclick="go(4)">View the ${prop.spec.status === 'approved' ? 'approved ' : ''}spec</button></div>`}
-    <h3>Audit log ${audit ? `<span class="badge" style="background:${audit.chain_valid ? 'var(--ok)' : 'var(--alert)'}">${audit.chain_valid ? '✓ Chain intact' : '✕ Tampered'}</span> <button class="dlb" onclick="downloadAudit('json')">Download JSON</button><button class="dlb" onclick="downloadAudit('csv')">Download CSV</button>` : ''}</h3>
-    <div style="overflow-x:auto">${audit ? `<table class="audit"><tr><th>When</th><th>Who</th><th>Action</th><th>Request</th><th>Hash</th></tr>${audit.entries.map(e => `<tr><td>${esc(e.ts.replace('T', ' ').slice(0, 19))}</td><td>${esc(e.actor)}</td><td>${actionPill(e.event)}</td><td>${esc(e.proposal_id)}</td><td class="hash">${esc(String(e.hash).slice(0, 12))}…</td></tr>`).join('')}</table>` : 'Loading…'}</div>`; }
+        <div class="btns">${prop.status === 'approved' && prop.recommendation.verdict !== 'RETIRE' ? `<a class="act" href="/dashboard/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Open dashboard</a>` : ''}${prop.status === 'approved' ? `<a class="act mid" href="/trace/${encodeURIComponent(prop.proposal_id)}" target="_blank" rel="noopener">Trace this decision</a>` : ''}<button class="act mid" onclick="newRequest()">Start a new request</button><button class="act mid" onclick="go(4)">View the ${prop.spec.status === 'approved' ? 'approved ' : ''}spec</button></div>`}
+    <h3>Audit log ${audit ? `<span class="badge" style="background:${audit.chain_valid ? 'var(--ok)' : 'var(--alert)'}">${audit.chain_valid ? '✓ Audit log intact' : '✕ Audit log altered'}</span> <button class="act mid sm" onclick="downloadAudit('json')">Download JSON</button><button class="act mid sm" onclick="downloadAudit('csv')">Download CSV</button>` : ''}</h3>
+    <div class="scroll">${audit ? `<table class="audit"><tr><th>When</th><th>Who</th><th>Action</th><th>Request</th><th>Hash</th></tr>${audit.entries.map(e => `<tr><td>${esc(e.ts.replace('T', ' ').slice(0, 19))}</td><td>${esc(e.actor)}</td><td>${actionPill(e.event)}</td><td>${esc(e.proposal_id)}</td><td class="hash">${esc(String(e.hash).slice(0, 12))}…</td></tr>`).join('')}</table>` : 'Loading…'}</div>`; }
 ];
 const preset = new URLSearchParams(location.search).get('prompt'); if (preset) request = preset; // e.g. opened from the home page with a prompt filled in
 render(); loadReview();
@@ -386,7 +375,7 @@ function restoreCurrent() {
     if (p.status === 'superseded') { store.del('dfCurrent'); return; }
     prop = p; pick = {}; audit = null; request = (p.recommendation.intent && p.recommendation.intent.raw) || p.spec.request || '';
     allProps = await api('/api/proposals').catch(() => [p]);
-    go(p.status !== 'pending_approval' ? 5 : (p.recommendation.clarify || []).length ? 1 : 3);
+    go(p.status !== 'pending_approval' ? 5 : (p.recommendation.clarify || []).length ? 1 : 3, true);
   }).catch(() => store.del('dfCurrent'));
 }
 restoreCurrent();

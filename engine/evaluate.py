@@ -284,6 +284,12 @@ def check_flow() -> dict:
                 check(all(t.get("headline") and t.get("message") for t in dash["tiles"] if t["state"] == "pending"),
                       f"{tag}: a pending tile does not explain itself")
                 check(dash["lifecycle"]["review_due"] is not None, f"{tag}: no review date")
+                # every ready tile says which way is better; signed measures stay neutral (None) so the UI never paints them green/red
+                from .measures import DIRECTION
+                for t in (t for t in dash["tiles"] if t["state"] == "ready"):
+                    check("direction" in t and t["metric"].split(" · ")[0].lower() in DIRECTION, f"{tag}: tile '{t['metric']}' has no direction")
+                    if t["metric"].split(" · ")[0] in db.SIGNED:
+                        check(t["direction"] is None, f"{tag}: signed measure '{t['metric']}' must be neutral")
                 if "plus the routes at red supply risk" in text:   # the builder must reproduce the home page's numbers exactly
                     from .home import home_data
                     h = home_data()

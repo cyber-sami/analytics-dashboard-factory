@@ -3,36 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Generated dashboard</title>
+<title>Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,800;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/base.css">
 <style>
-  /* Same look as the Supply operations overview (static/index.html). Data comes from /api/dashboards/{id}. */
-  :root {
-    --navy: #0B2D3E; --brand-blue: #0068A8; --brand-green: #5DBB46; --bg: #F4F8FB; --cta: #C8003F; --card: #ffffff; --ink: #0B2D3E; --muted: #35566A; --line: #D5E2EB;
-    --ok: #1a7f46; --ok-bg: #e3f6ea; --alert: #C8003F; --alert-bg: #fde4e7; --mist: #E8F3FA;
-    --u: clamp(14px, 1vw, 22px); /* scales everything up on a wall screen */
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Figtree", system-ui, "Segoe UI", sans-serif; font-size: var(--u); font-weight: 400; font-variant-numeric: tabular-nums; }
-  b, h1, h2, .num { font-weight: 800; }
-  header { background: linear-gradient(120deg, #0B2D3E 0%, #0068A8 60%, #00B3B8 100%); color: #fff; padding: 1.2em 2.4em; display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
-  header h1 { margin: 0; font-size: 1.8em; letter-spacing: -.01em; font-style: italic; }
-  header .meta { opacity: .85; font-size: 1.1em; max-width: 46em; }
-  header .right { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
-  header a { color: #fff; text-decoration: none; font-weight: 800; background: #ffffff2e; border-radius: 99em; padding: .5em 1.2em; }
-  .badge { font-size: 1.25em; font-weight: 800; padding: .35em 1em; border-radius: 99em; background: var(--ok); }
+  /* Same look as the Supply operations overview (static/index.html). Tokens, header, focus, skeleton and error styles live in /static/base.css.
+     Data comes from /api/dashboards/{id}. */
+  html { scroll-behavior: smooth; }
+  header .meta + .meta { margin-top: .3em; }
+  .num { font-weight: 800; }
+  .badge { font-weight: 800; padding: .35em 1em; border-radius: 99em; background: var(--ok); }
   main { padding: 1.6em 2.4em 2.4em; display: grid; gap: 2em; }
-  h2 { margin: 0 0 .7em; font-size: 1em; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  h2 { margin: 0 0 .7em; font-size: 1em; color: var(--muted); }
   .row { display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+  .row.head { margin-bottom: .7em; }
   .row h2 { margin: 0; }
 
   .facts { display: flex; flex-wrap: wrap; gap: 1em; }
   .fact { background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; padding: .7em 1.3em; }
-  .fact small { display: block; font-size: .8em; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  .fact b { font-size: 1.15em; }
-  .hash { font-family: ui-monospace, monospace; font-size: .95em; }
+  .fact small { display: block; font-size: var(--s); color: var(--muted); }
+  .hash { font-family: ui-monospace, monospace; font-size: var(--s); }
   .sample { background: var(--mist); border-radius: 1em; padding: .9em 1.3em; color: var(--muted); line-height: 1.5; }
 
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(20em, 1fr)); gap: 1.4em; }
@@ -43,80 +35,89 @@
   .seg { display: inline-flex; border: .1em solid var(--brand-blue); border-radius: .75em; overflow: hidden; }
   .seg button { font: inherit; font-weight: 800; background: #fff; color: var(--brand-blue); border: 0; padding: .4em 1.1em; cursor: pointer; }
   .seg button.on { background: var(--brand-blue); color: #fff; }
+  .seg button:focus-visible { outline-offset: -.3em; }
+  .seg button.on:focus-visible { outline-color: #fff; }
   .otiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(13em, 1fr)); gap: 1.2em; }
-  .otile { background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; padding: 1.1em 1.3em; min-width: 0; }
-  .otile .label { font-size: 1.15em; font-weight: 800; color: var(--muted); } .otile .num { font-size: 3em; font-weight: 800; line-height: 1.1; color: var(--ink); }
-  .otile .num small { font-size: .35em; font-weight: 600; color: var(--muted); } .otile .delta { color: var(--muted); margin: .1em 0 .3em; }
-  .otile .mini { height: 3.2em; margin: .2em 0; } .otile .otag { font-size: .85em; color: var(--muted); }
+  .otile { background: var(--card); border: .06em solid var(--line); border-radius: 1.25em; padding: 0 1.3em 1.1em; min-width: 0; overflow: hidden; }
+  .otile .strip { display: block; height: .4em; margin: 0 -1.3em .8em; } /* one colour per tile; red only for the risk snapshot */
+  .otile .label { font-weight: 800; color: var(--muted); } .otile .num { font-size: 3em; line-height: 1.1; color: var(--ink); }
+  .otile .num small { font-size: .35em; font-weight: 400; color: var(--muted); } .otile .delta { margin: .1em 0 .3em; }
+  .otile .mini { height: 3.2em; margin: .2em 0; } .otile .otag { font-size: var(--s); color: var(--muted); }
   .pills { display: flex; flex-wrap: wrap; gap: .8em; }
   .pill { display: flex; align-items: center; gap: .6em; background: var(--card); border: .06em solid var(--line); border-radius: 99em; padding: .35em 1em .35em .4em; font-weight: 800; }
-  .pill i { width: 1.5em; height: 1.5em; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: .8em; } .pill small { color: var(--muted); font-weight: 400; }
-  .pill .dot0 { background: var(--ok); } .pill .dot1 { background: #0068A8; } .pill .dot2 { background: var(--alert); }
+  .pill i { width: 1.5em; height: 1.5em; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: var(--s); } .pill small { color: var(--muted); font-weight: 400; }
+  .pill .dot0 { background: var(--ok); } .pill .dot1 { background: #8A5300; } .pill .dot2 { background: var(--alert); }
   .card.redroute { border-left: .45em solid var(--alert); }
-  .card .value small { font-size: .32em; font-weight: 600; color: var(--muted); }
-  .subtitle { color: var(--muted); font-weight: 600; margin-top: .1em; }
+  .card .value small { font-size: .32em; font-weight: 400; color: var(--muted); }
+  .subtitle { color: var(--muted); margin-top: .1em; }
   .card.pending { border-style: dashed; background: #fbfdfe; }
   .card .top { display: flex; justify-content: space-between; align-items: baseline; gap: .6em; }
-  .card .kpi { font-size: 1.25em; font-weight: 800; line-height: 1.25; }
-  .chip { font-size: .85em; font-weight: 600; color: var(--muted); background: var(--mist); border-radius: 99em; padding: .15em .8em; white-space: nowrap; }
-  .card .value { font-size: 3.2em; font-weight: 800; line-height: 1.1; margin-top: .15em; color: var(--brand-blue); }
-  .card .delta { font-size: 1em; color: var(--muted); margin: .1em 0 .4em; font-weight: 600; }
+  .card .kpi, .cmpcard .kpi { font-weight: 800; line-height: 1.25; }
+  .chip { font-size: var(--s); color: var(--muted); background: var(--mist); border-radius: 99em; padding: .15em .8em; white-space: nowrap; }
+  .card .value { font-size: 3em; font-weight: 800; line-height: 1.1; margin-top: .15em; color: var(--brand-blue); }
+  .delta { font-weight: 800; color: var(--muted); }
+  .delta.good { color: var(--ok); } .delta.bad { color: var(--alert); }
+  .card .delta { margin: .1em 0 .4em; }
   .card .chart { height: 7em; }
-  .card .cap { color: var(--muted); margin-top: .5em; font-size: .95em; }
-  .card .warn { color: var(--alert); font-weight: 800; margin-top: .4em; }
+  .card .cap { color: var(--muted); margin-top: .5em; font-size: var(--s); }
+  .more { margin-top: .4em; color: var(--muted); font-size: var(--s); } .more summary { cursor: pointer; font-weight: 800; } .more div { margin-top: .2em; }
   .chip.ng { background: #fff; border: .06em dashed var(--muted); font-weight: 800; }
-  .small { color: var(--muted); font-size: .95em; margin-top: -1em; }
-  .card.pending .value { color: var(--muted); font-size: 2em; }
+  .note { margin-top: .6em; } .tight { margin-top: .2em; }
+  .small, .cap, .subtitle, .sample, .vdetail, .todopanel li, .warnbox li { max-width: 65ch; }
+  .card.pending .value { color: var(--muted); font-size: var(--l); }
 
   .strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6em 1em; background: var(--card); border: .06em solid var(--line); border-radius: 1em; padding: .6em 1em; color: var(--muted); }
   .chipbtn { font: inherit; font-weight: 800; background: var(--alert-bg); color: var(--alert); border: .08em solid var(--alert); border-radius: 99em; padding: .25em .9em; cursor: pointer; }
   .infopanel { display: grid; gap: 1.6em; } .infopanel > * { min-width: 0; } .infopanel[hidden] { display: none; }
-  .todobtn { background: var(--brand-blue); color: #fff; border-color: var(--brand-blue); }
+  button.tog.todobtn { background: var(--brand-blue); color: #fff; border-color: var(--brand-blue); }
+  button.tog.todobtn:focus-visible { outline-color: var(--navy); }
   .todopanel { background: #fff; border: .12em solid var(--brand-blue); border-radius: 1em; padding: 1em 1.4em; } .todopanel h2 { margin: 0 0 .4em; color: var(--brand-blue); }
-  .stepgrp { margin: .5em 0; } .stepwho { font-weight: 800; color: var(--muted); font-size: .9em; letter-spacing: .04em; text-transform: uppercase; } .stepgrp ul { margin: .2em 0 0; padding-left: 1.3em; line-height: 1.7; }
+  .stepgrp { margin: .5em 0; } .stepwho { font-weight: 800; color: var(--muted); font-size: var(--s); } .stepgrp ul { margin: .2em 0 0; padding-left: 1.3em; line-height: 1.7; }
   ol.todo { margin: 0; padding-left: 1.3em; line-height: 1.7; }
   .warnbtn { font: inherit; font-weight: 800; color: var(--alert); background: none; border: 0; padding: .2em 0; margin-top: .4em; cursor: pointer; text-align: left; text-decoration: underline dotted; text-underline-offset: .2em; }
   .warnbtn:hover { text-decoration-style: solid; }
   .vdetail { background: var(--alert-bg); border-radius: .8em; padding: .7em 1em; margin-top: .4em; line-height: 1.5; } .vdetail ul { margin: 0; padding-left: 1.2em; }
   .warnbox { background: var(--alert-bg); border: .12em solid var(--alert); border-radius: 1em; padding: 1em 1.4em; }
-  .warnbox h3 { margin: 0 0 .3em; color: var(--alert); font-size: 1.05em; } .warnbox ul { margin: 0; padding-left: 1.2em; line-height: 1.6; }
+  .warnbox.gap { margin-top: 1em; }
+  .warnbox h3 { margin: 0 0 .3em; color: var(--alert); font-size: 1em; } .warnbox ul { margin: 0; padding-left: 1.2em; line-height: 1.6; }
   .contacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(16em, 1fr)); gap: .8em; }
   .contact { background: #fff; border: .06em solid var(--line); border-radius: 1em; padding: .8em 1.1em; } .contact.off { border: .12em solid var(--alert); }
-  .contact .role { font-size: .8em; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .contact .role { font-size: var(--s); color: var(--muted); }
   .chip.st.ok { background: var(--ok-bg); color: var(--ok); font-weight: 800; } .chip.st.bad { background: var(--alert-bg); color: var(--alert); font-weight: 800; }
   .who { background: var(--mist); border-radius: 1em; padding: 1em 1.4em; margin-top: 1em; }
-  .who h3 { margin: 0 0 .4em; font-size: 1.05em; } .who ol { margin: 0; padding-left: 1.3em; line-height: 1.7; }
+  .who h3 { margin: 0 0 .4em; font-size: 1em; } .who ol { margin: 0; padding-left: 1.3em; line-height: 1.7; }
   main > * { min-width: 0; } /* grid children may shrink, so wide tables scroll inside their box instead of widening the page */
   table.trail th, table.trail td { text-align: left; } table.trail { min-width: 34em; }
   .rules { display: flex; flex-wrap: wrap; gap: .6em; }
-  .rules span { background: var(--card); border: .06em solid var(--line); border-radius: 99em; padding: .3em 1em; font-weight: 600; }
+  .rules span { background: var(--card); border: .06em solid var(--line); border-radius: 99em; padding: .3em 1em; }
   ul.todo { margin: 0; padding-left: 1.3em; line-height: 1.7; }
   button.tog { font: inherit; font-weight: 800; background: #fff; color: var(--brand-blue); border: .1em solid var(--brand-blue); border-radius: .75em; padding: .4em 1.2em; cursor: pointer; }
   table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 1em; overflow: hidden; }
   th, td { padding: .6em .9em; border-bottom: .06em solid var(--line); text-align: right; } th:first-child, td:first-child { text-align: left; }
-  th { color: var(--muted); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; }
+  th { color: var(--muted); font-size: var(--s); }
   .scroll { overflow-x: auto; }
+  .scroll th:first-child, .scroll td:first-child { position: sticky; left: 0; background: var(--card); } /* month stays visible when a wide table scrolls */
 
-  .skel { background: linear-gradient(90deg, #E8F3FA 25%, #F4F8FB 50%, #E8F3FA 75%); background-size: 200% 100%; animation: sh 1.2s infinite; border-radius: 1em; }
   .skel.card { height: 16em; border: 0; } .skel.fact { height: 4em; width: 13em; }
-  @keyframes sh { to { background-position: -200% 0; } }
-  .error { background: var(--alert-bg); border: .15em solid var(--alert); border-radius: .9em; padding: 1.4em 1.6em; font-size: 1.15em; }
-  .error button { font: inherit; font-weight: 800; margin-left: 1em; padding: .4em 1.2em; border-radius: .5em; border: 0; background: var(--alert); color: #fff; cursor: pointer; }
-  @media (max-width: 800px) { header, main { padding-inline: 1em; } }
+  @media (max-width: 800px) { main { padding-inline: 1em; } }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header>
-  <div><h1 id="title">Generating…</h1><div class="meta" id="meta"></div><div class="meta" id="policy" style="margin-top:.3em"></div></div>
-  <div class="right">
+  <div><h1 id="title">Loading dashboard…</h1><div class="meta" id="meta"></div><div class="meta" id="policy"></div></div>
+  <nav class="right" aria-label="Pages">
     <a href="/my-dashboards">My dashboards</a>
-    <a href="/pipeline">← Back to the factory</a>
+    <a href="/pipeline">Back to the factory</a>
     <div class="badge" id="badge" hidden>✓ Approved</div>
-  </div>
+  </nav>
 </header>
+<div class="sr" id="live" aria-live="polite"></div>
 <main id="main"></main>
 <script>
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 Chart.defaults.font.family = '"Figtree", system-ui, sans-serif'; Chart.defaults.color = '#35566A';
+if (REDUCED) Chart.defaults.animation = false;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pid = location.pathname.split('/').pop();
@@ -128,7 +129,7 @@ let D, PROP = null, AUDIT = null, INFO_OPEN = false, TODO_OPEN = false, VIEW = '
 
 function skeleton() {
   $('main').innerHTML = `<div class="skel" style="height:3.2em"></div>
-    <section><h2>KPIs</h2><div class="cards">${'<div class="skel card"></div>'.repeat(3)}</div></section>`;
+    <section><div class="cards">${'<div class="skel card"></div>'.repeat(3)}</div></section>`;
 }
 
 // One plain line from the engine's change_policy: what happens to existing assets (non-destructive by default).
@@ -147,6 +148,35 @@ function changeText(t, dl, pc) {
   const sg = dl >= 0 ? '+' : '−', a = Math.abs(dl);
   return sg + (t.unit === '%' ? a.toFixed(1) + ' pts' : fmt(a, t.unit));
 }
+// Is a rise good or bad? The engine says so on each tile (t.direction, from engine/measures.py). Missing or null means
+// neutral grey, e.g. a variance where closest to zero is best, so a colour is never guessed.
+const direction = t => t.direction || null;
+// One sentence from what moved since last month, worse first. Per-product tiles and neutral measures stay out of it.
+function takeaway(d) {
+  const mv = d.tiles.filter(t => t.state === 'ready' && !t.slice && t.kind !== 'snapshot' && t.change_basis !== 'none' && t.direction && t.value !== t.previous)
+    .map(t => ({ name: String(t.metric).toLowerCase(), good: (t.direction === 'higher_is_better') === (t.value > t.previous) }));
+  const names = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a.at(-1) : a[0];
+  const up = mv.filter(m => m.good).map(m => m.name), down = mv.filter(m => !m.good).map(m => m.name);
+  const s = down.length && up.length ? `${names(down)} got worse, while ${names(up)} improved` : down.length ? `${names(down)} got worse` : up.length ? `${names(up)} improved` : '';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+const variantLabel = t => { const b = t.slice ? String(t.metric).replace(' · ' + t.slice, '') : t.metric, n = t.conflicting_variants; return `⚠ ${n} other definition${n === 1 ? '' : 's'} of ${esc(b)}`; };
+// Table columns use one format per column (same decimals, same k or M) and say their unit.
+const UNIT_NAME = { EUR: 'euros', '%': 'percent', weeks: 'weeks', units: 'units', count: 'count', ms: 'milliseconds' };
+function colFmt(t) { const m = Math.max(...t.series.map(x => Math.abs(x.value)));
+  if (t.unit === 'EUR') return m >= 1e6 ? v => '€' + (v / 1e6).toFixed(2) + 'M' : m >= 1e3 ? v => '€' + (v / 1e3).toFixed(0) + 'k' : v => '€' + v.toFixed(0);
+  if (t.unit === 'units') return m >= 1e6 ? v => (v / 1e6).toFixed(2) + 'M' : v => (v / 1e3).toFixed(0) + 'k';
+  return v => fmt(v, t.unit); }
+const endLabelFor = t => ({ id: 'endLabel', afterDatasetsDraw(c) { const p = c.getDatasetMeta(0).data, last = p[p.length - 1]; if (!last) return; const x = c.ctx; x.save(); x.font = '800 13px Figtree, system-ui, sans-serif'; x.fillStyle = c.data.datasets[0].borderColor; x.textAlign = 'right'; x.textBaseline = 'bottom'; x.fillText(fmt(t.value, t.unit), last.x + 4, last.y - 9); x.restore(); } });
+const barLabels = { id: 'barLabels', afterDatasetsDraw(c) { const x = c.ctx; x.save(); x.font = '800 12px Figtree, system-ui, sans-serif'; x.fillStyle = '#35566A'; x.textAlign = 'center'; c.getDatasetMeta(0).data.forEach((b, i) => x.fillText(Math.round(c.data.datasets[0].data[i]) + '%', b.x, b.y - 4)); x.restore(); } };
+// Change versus last month: arrow for direction, colour and the words better/worse for whether that is good, so colour is never the only cue.
+function deltaHtml(t) {
+  if (t.change_basis === 'none') return '';
+  const dl = t.value - t.previous, pc = dl / Math.abs(t.previous || 1) * 100, up = dl >= 0, flat = Math.abs(dl) < 1e-9, dir = direction(t);
+  let cls = '', word = '';
+  if (dir && !flat) { const good = (dir === 'higher_is_better') === up; cls = good ? ' good' : ' bad'; word = good ? ', better' : ', worse'; }
+  return `<div class="delta${cls}">${flat ? '–' : up ? '▲' : '▼'} ${changeText(t, dl, pc)} vs last month${word}</div>`;
+}
 // What the red "conflicting KPI variants" line means, from the recommendation the engine stored (no extra API call).
 const VARIANT_WHY = { definition_conflict: 'Defined differently, so its numbers can disagree with the approved KPI', duplicate_candidate: 'Probably the same measure under another name' };
 function variantsHtml(t) {
@@ -154,39 +184,41 @@ function variantsHtml(t) {
   const k = ((PROP && PROP.recommendation && PROP.recommendation.kpis) || []).find(x => x.metric === base);
   const list = k ? k.conflicting_variants || [] : [];
   return `<p style="margin:.2em 0 .5em"><b>This dashboard uses the approved definition${k ? ' ' + esc(k.canonical_kpi) : ''}.</b> The data pack also holds other definitions of ${esc(base)}, which could give different numbers elsewhere:</p>
-    <ul>${list.length ? list.map(v => `<li><b>${esc(v.kpi_id)} ${esc(v.kpi_name)}</b> · ${esc(String(v.definition_status).replace(/_/g, ' '))}<br><span class="small">${esc(VARIANT_WHY[v.definition_status] || '')}</span></li>`).join('') : '<li class="small">Details are not available for this tile.</li>'}</ul>
-    <p class="small" style="margin:.4em 0 0">What to do: ${t.kpi_owner ? '<b>' + esc(t.kpi_owner) + '</b>, the owner of the approved KPI, decides which definitions are kept, merged or retired (RULE-002). Nothing is changed by this dashboard.' : 'the KPI owner decides which definitions are kept, merged or retired (RULE-002).'}</p>`;
+    <ul>${list.length ? list.map(v => `<li><b>${esc(v.kpi_id)} ${esc(v.kpi_name)}</b>, ${esc(String(v.definition_status).replace(/_/g, ' '))}<br><span class="small">${esc(VARIANT_WHY[v.definition_status] || '')}</span></li>`).join('') : '<li class="small">Details are not available for this measure.</li>'}</ul>
+    <p class="small note">What to do: ${t.kpi_owner ? '<b>' + esc(t.kpi_owner) + '</b>, the owner of the approved KPI, decides which definitions are kept, merged or retired. Nothing is changed by this dashboard.' : 'the KPI owner decides which definitions are kept, merged or retired.'}</p>`;
 }
 function toggleVariants(btn) { const d = btn.nextElementSibling; d.hidden = !d.hidden; btn.setAttribute('aria-expanded', String(!d.hidden)); }
+// Secondary facts about a tile (KPI id, frequency, criticality, owner) sit one click away, one per line.
+function moreHtml(lines) { const l = lines.filter(Boolean); return l.length ? `<details class="more"><summary>Details</summary>${l.map(x => `<div>${esc(x)}</div>`).join('')}</details>` : ''; }
 function card(t, i) {
   if (t.state === 'pending') return `<div class="card pending"><div class="top"><span class="kpi">${esc(t.metric)}</span><span class="chip">${t.reason === 'not_in_pack' ? 'not in the pack' : 'no data yet'}</span></div>
     <div class="value">${esc(t.headline || 'No data')}</div>
-    <div class="cap">${esc(t.message || '')}</div>${t.kpi_id ? `<div class="cap">${esc(t.kpi_id)}${t.kpi_owner ? ' · owner ' + esc(t.kpi_owner) : ''}</div>` : ''}</div>`;
+    <div class="cap">${esc(t.message || '')}</div>${t.kpi_id ? `<div class="cap">${esc(t.kpi_id)}${t.kpi_owner ? ', owner ' + esc(t.kpi_owner) : ''}</div>` : ''}</div>`;
   const snap = t.kind === 'snapshot', route = !!t.slice && !!t.risk_status;
-  const dl = t.value - t.previous, pc = dl / Math.abs(t.previous || 1) * 100, n = (t.series || []).length;
+  const n = (t.series || []).length;
   const base = route ? String(t.metric).replace(' · ' + t.slice, '') : null;
   const title = route ? t.slice : t.metric;
   const sub = route ? `<div class="subtitle">${esc(base)}, last ${n} months</div>` : '';
   const bigValue = snap ? `${Math.round(t.value)}<small> ${esc(t.value_label || '')}</small>` : fmt(t.value, t.unit);
-  const delta = t.change_basis === 'none' ? '' : `<div class="delta">${dl >= 0 ? '▲' : '▼'} ${changeText(t, dl, pc)} vs last month</div>`;
-  const cap = snap ? [t.frequency, t.breakdown_unit && 'bars: ' + t.breakdown_unit + ' by ' + t.breakdown_by].filter(Boolean).join(' · ')
-    : [`Last ${n} months`, t.kpi_id, t.frequency, t.criticality && t.criticality + ' criticality', t.kpi_owner && 'owner ' + t.kpi_owner].filter(Boolean).join(' · ');
+  const cap = snap ? (t.breakdown_unit ? 'Bars show ' + t.breakdown_unit + ' by ' + t.breakdown_by : '') : `Last ${n} months`;
+  const more = snap ? [t.frequency] : [t.kpi_id, t.frequency, t.criticality && t.criticality + ' criticality', t.kpi_owner && 'Owner: ' + t.kpi_owner];
   return `<div class="card${t.risk_status === 'red' ? ' redroute' : ''}"><div class="top"><span class="kpi">${esc(title)}</span><span class="chip">${esc(t.origin)}</span></div>${sub}
     <div class="value">${bigValue}</div>
-    ${delta}
+    ${deltaHtml(t)}
     <div class="chart"><canvas data-i="${i}" role="img" aria-label="${esc(t.metric)}${snap ? ' by ' + esc(t.breakdown_by) : ', last ' + n + ' months'}"></canvas></div>
     <div class="cap">${esc(cap)}</div>
     <div class="cap">${t.governed === false ? '<span class="chip ng">not governed</span> ' : ''}${esc(t.data_note || '')}</div>
-    ${t.conflicting_variants ? `<button type="button" class="warnbtn" aria-expanded="false" onclick="toggleVariants(this)">▲ ${t.conflicting_variants} conflicting KPI variants to resolve <span aria-hidden="true">▾</span></button><div class="vdetail" hidden>${variantsHtml(t)}</div>` : ''}</div>`;
+    ${moreHtml(more)}
+    ${t.conflicting_variants ? `<button type="button" class="warnbtn" aria-expanded="false" onclick="toggleVariants(this)">${variantLabel(t)} <span aria-hidden="true">▾</span></button><div class="vdetail" hidden>${variantsHtml(t)}</div>` : ''}</div>`;
 }
 
 // Overview: the calm layout of the home page (compact tiles, product chips, the most urgent routes). Charts and Table views stay one click away.
-function conflictHtml(t) { return t.conflicting_variants ? `<button type="button" class="warnbtn" aria-expanded="false" onclick="toggleVariants(this)">▲ ${t.conflicting_variants} conflicting KPI variants ▾</button><div class="vdetail" hidden>${variantsHtml(t)}</div>` : ''; }
+function conflictHtml(t) { return t.conflicting_variants ? `<button type="button" class="warnbtn" aria-expanded="false" onclick="toggleVariants(this)">${variantLabel(t)} <span aria-hidden="true">▾</span></button><div class="vdetail" hidden>${variantsHtml(t)}</div>` : ''; }
+const TILE_STRIP = ['#00B3B8', '#4DB8F5', '#5DBB46'];
 function otile(t, i) {
-  const snap = t.kind === 'snapshot', dl = t.value - t.previous, pc = dl / Math.abs(t.previous || 1) * 100;
+  const snap = t.kind === 'snapshot';
   const big = snap ? `${Math.round(t.value)}<small> ${esc(t.value_label || '')}</small>` : fmt(t.value, t.unit);
-  const delta = t.change_basis === 'none' ? '' : `<div class="delta">${dl >= 0 ? '▲' : '▼'} ${changeText(t, dl, pc)} vs last month</div>`;
-  return `<div class="otile"><div class="label">${esc(t.metric)}</div><div class="num">${big}</div>${delta}
+  return `<div class="otile"><i class="strip" style="background:${snap ? '#C8003F' : TILE_STRIP[i % TILE_STRIP.length]}"></i><div class="label">${esc(t.metric)}</div><div class="num">${big}</div>${deltaHtml(t)}
     ${snap || !(t.series || []).length ? '' : `<div class="mini"><canvas data-i="${i}" data-mini="1" role="img" aria-label="${esc(t.metric)} trend"></canvas></div>`}
     <div class="otag">${t.governed === false ? '<span class="chip ng">not governed</span> ' : ''}${esc(t.origin || '')}</div>${conflictHtml(t)}</div>`;
 }
@@ -207,16 +239,20 @@ function overviewHtml(d) {
   if (snap && snap[0].breakdown) {
     const bd = snap[0].breakdown, tot = bd.reduce((a, x) => a + x.total, 0), share = tot ? bd.reduce((a, x) => a + x.red, 0) / tot * 100 : 0;
     h += `<section><h2>By ${esc(snap[0].breakdown_by || 'group')}</h2><div class="pills">${bd.map(x => { const lvl = x.share_pct > share ? 2 : x.red > 0 ? 1 : 0;
-      return `<div class="pill" title="${esc(x.label + ': ' + x.red + ' of ' + x.total + ' routes red')}"><i class="dot${lvl}">${['✓', '▲', '✕'][lvl]}</i>${esc(x.label)} <small>${Math.round(x.share_pct)}% red</small></div>`; }).join('')}</div>
-      <div class="small" style="margin-top:.5em">✕ above the share across the whole scope (${Math.round(share)}%), ▲ some red routes, ✓ none. Red is the data pack's own risk label.</div></section>`;
+      return `<div class="pill" title="${esc(x.label + ': ' + x.red + ' of ' + x.total + ' routes red')}"><i class="dot${lvl}">${['✓', '!', '✕'][lvl]}</i>${esc(x.label)} <small>${Math.round(x.share_pct)}% red</small></div>`; }).join('')}</div>
+      <div class="small note">✕ above the share across the whole scope (${Math.round(share)}%), ! some red routes, ✓ none. Red is the data pack's own risk label.</div></section>`;
   }
   if (route.length) h += `<section><h2>Most urgent: ${route.length} route${route.length === 1 ? '' : 's'} marked red</h2><div class="cards">${route.map(([t, i]) => routeCard(t, i)).join('')}</div></section>`;
   if (pend.length) h += `<section><h2>Not available yet</h2><div class="cards">${pend.map(([t, i]) => card(t, i)).join('')}</div></section>`;
   return h;
 }
-function setView(v) { VIEW = v; render(); }
-// Comparison: tiles that share a measure but differ by product, market or platform are drawn together in ONE chart, one colour each.
-const CMP_COLORS = ['#0068A8', '#C8003F', '#00A3A8', '#6B4FC4', '#5DBB46', '#0B2D3E', '#4DB8F5'];
+// Switching view redraws the page, so focus goes back to the button that was pressed and the change is announced.
+function setView(v) { VIEW = v; render(); $('live').textContent = 'Showing the ' + v + ' view'; document.querySelector('[aria-label="View"] button.on')?.focus(); }
+// Comparison: tiles that share a measure but differ by product, market or platform are drawn together in ONE chart.
+// Colour-blind-safe palette with no red (red only ever means risk), at most 5 lines, each also told apart by its dash pattern and a direct label.
+const CMP_COLORS = ['#0068A8', '#E69F00', '#CC79A7', '#4A5A66', '#56B4E9'];
+const CMP_DASH = [[], [7, 4], [2, 3], [10, 3, 2, 3], [4, 4]];
+const CMP_MAX = CMP_COLORS.length;
 function cmpGroups(d) {
   const g = new Map();
   d.tiles.forEach((t, i) => { if (t.state !== 'ready' || !t.slice || t.risk_status || t.kind === 'snapshot' || !(t.series || []).length) return;
@@ -225,24 +261,34 @@ function cmpGroups(d) {
 }
 function cmpHtml(d) {
   const gs = cmpGroups(d); if (!gs.length) return '';
-  return `<section><div class="row" style="margin-bottom:.7em"><h2>Comparison</h2><div class="seg" role="group" aria-label="Scale">${[[false, 'Values'], [true, 'Indexed']].map(([k, l]) => `<button class="${CMP_INDEXED === k ? 'on' : ''}" aria-pressed="${CMP_INDEXED === k}" onclick="setCmpMode(${k})">${l}</button>`).join('')}</div></div>
-    <div class="cmpgrid">${gs.map((x, k) => `<div class="cmpcard"><div class="kpi">${esc(x.name)}: ${x.items.map(y => esc(y.t.slice)).join(' vs ')}</div><div class="cmpchart"><canvas data-cmp="${k}" role="img" aria-label="${esc(x.name)} compared across ${x.items.map(y => esc(y.t.slice)).join(', ')}"></canvas></div></div>`).join('')}</div>
-    <div class="small" style="margin-top:.5em">${CMP_INDEXED ? 'Indexed: each line starts at 100 in its first month, so the movement can be compared even when the levels differ.' : 'Values: the real numbers on one scale.'}</div></section>`;
+  return `<section><div class="row head"><span class="small">${CMP_INDEXED ? 'Indexed: each line starts at 100 in its first month, so the movement can be compared even when the levels differ.' : 'Values: the real numbers on one scale.'}</span><div class="seg" role="group" aria-label="Scale">${[[false, 'Values'], [true, 'Indexed']].map(([k, l]) => `<button class="${CMP_INDEXED === k ? 'on' : ''}" aria-pressed="${CMP_INDEXED === k}" onclick="setCmpMode(${k})">${l}</button>`).join('')}</div></div>
+    <div class="cmpgrid">${gs.map((x, k) => { const shown = x.items.slice(0, CMP_MAX), more = x.items.length - shown.length;
+      return `<div class="cmpcard"><div class="kpi">${esc(x.name)}: ${shown.map(y => esc(y.t.slice)).join(' vs ')}</div><div class="cmpchart"><canvas data-cmp="${k}" role="img" aria-label="${esc(x.name)} compared across ${shown.map(y => esc(y.t.slice)).join(', ')}"></canvas></div>${more > 0 ? `<div class="small">Showing ${shown.length} of ${x.items.length}. The Table view has all of them.</div>` : ''}</div>`; }).join('')}</div></section>`;
 }
-function setCmpMode(v) { CMP_INDEXED = v; render(); }
+function setCmpMode(v) { CMP_INDEXED = v; render(); $('live').textContent = v ? 'Showing indexed values' : 'Showing real values'; document.querySelector('[aria-label="Scale"] button.on')?.focus(); }
+// Names each line at its last point (nudged apart when they would overlap), so no legend is needed.
+const endLabels = { id: 'endLabels', afterDatasetsDraw(c) {
+  const ctx = c.ctx, x0 = c.chartArea.right + 8, room = c.width - x0 - 2, items = [];
+  c.data.datasets.forEach((ds, k) => { let j = ds.data.length - 1; while (j >= 0 && ds.data[j] == null) j--; const p = j >= 0 && c.getDatasetMeta(k).data[j]; if (p) items.push({ y: p.y, text: ds.label, color: ds.borderColor }); });
+  items.sort((a, b) => a.y - b.y); for (let i = 1; i < items.length; i++) if (items[i].y - items[i - 1].y < 15) items[i].y = items[i - 1].y + 15;
+  ctx.save(); ctx.font = '800 12px Figtree, system-ui, sans-serif'; ctx.textBaseline = 'middle';
+  items.forEach(it => { let s = it.text; while (s.length > 1 && ctx.measureText(s).width > room - 14) s = s.slice(0, -2) + '…';
+    ctx.fillStyle = it.color; ctx.beginPath(); ctx.arc(x0 + 4, it.y, 4, 0, 6.3); ctx.fill(); ctx.fillStyle = '#35566A'; ctx.fillText(s, x0 + 14, it.y); });
+  ctx.restore(); } };
 function initComparisons(d) {
   const gs = cmpGroups(d);
   document.querySelectorAll('canvas[data-cmp]').forEach(cv => {
     const x = gs[cv.dataset.cmp]; if (!x) return;
-    const months = [...new Set(x.items.flatMap(y => y.t.series.map(m => m.month)))].sort((a, b) => monthKey(a) - monthKey(b));
-    const datasets = x.items.map((y, k) => {
+    const items = x.items.slice(0, CMP_MAX);
+    const months = [...new Set(items.flatMap(y => y.t.series.map(m => m.month)))].sort((a, b) => monthKey(a) - monthKey(b));
+    const datasets = items.map((y, k) => {
       const mp = new Map(y.t.series.map(m => [m.month, m.value])), first = y.t.series[0].value;
-      return { label: y.t.slice, data: months.map(m => mp.has(m) ? (CMP_INDEXED ? mp.get(m) / first * 100 : mp.get(m)) : null), borderColor: CMP_COLORS[k % CMP_COLORS.length], backgroundColor: CMP_COLORS[k % CMP_COLORS.length],
+      return { label: y.t.slice, data: months.map(m => mp.has(m) ? (CMP_INDEXED ? mp.get(m) / first * 100 : mp.get(m)) : null), borderColor: CMP_COLORS[k], backgroundColor: CMP_COLORS[k], borderDash: CMP_DASH[k],
         borderWidth: 2.5, tension: .25, spanGaps: true, pointRadius: months.map((_, j) => j === months.length - 1 ? 4 : 0), pointHoverRadius: 5 };
     });
-    charts.push(new Chart(cv, { type: 'line', data: { labels: months, datasets },
-      options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${CMP_INDEXED ? c.parsed.y.toFixed(0) + ' (index)' : fmt(c.parsed.y, x.unit)}` } } },
+    charts.push(new Chart(cv, { type: 'line', data: { labels: months, datasets }, plugins: [endLabels],
+      options: { maintainAspectRatio: false, layout: { padding: { right: 112 } }, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${CMP_INDEXED ? c.parsed.y.toFixed(0) + ' (index)' : fmt(c.parsed.y, x.unit)}` } } },
         scales: { y: { grid: { color: '#E8F3FA' }, ticks: { maxTicksLimit: 5, callback: v => CMP_INDEXED ? v : fmt(v, x.unit) } }, x: { grid: { display: false }, ticks: { maxTicksLimit: 5 } } } } }));
   });
 }
@@ -253,50 +299,51 @@ function tableView(d) {
   const ready = d.tiles.filter(t => t.state === 'ready' && t.kind !== 'snapshot' && (t.series || []).length); if (!ready.length) return '';
   const months = [...new Set(ready.flatMap(t => t.series.map(x => x.month)))].sort((x, y) => monthKey(x) - monthKey(y));
   const look = ready.map(t => new Map(t.series.map(x => [x.month, x.value])));
-  return `<div class="scroll"><table><tr><th>Month</th>${ready.map(t => `<th>${esc(t.metric)}</th>`).join('')}</tr>` +
-    months.map(m => `<tr><td>${esc(m)}</td>${ready.map((t, j) => `<td>${look[j].has(m) ? fmt(look[j].get(m), t.unit) : '-'}</td>`).join('')}</tr>`).join('') + '</table></div>';
+  const ff = ready.map(colFmt);
+  return `<div class="scroll"><table><tr><th>Month</th>${ready.map(t => `<th>${esc(t.metric)}<br><span class="small">${esc(UNIT_NAME[t.unit] || t.unit)}</span></th>`).join('')}</tr>` +
+    months.map(m => `<tr><td>${esc(m)}</td>${ready.map((t, j) => `<td>${look[j].has(m) ? ff[j](look[j].get(m)) : '–'}</td>`).join('')}</tr>`).join('') + '</table></div>';
 }
 
+function infoLabel() { return (INFO_OPEN ? 'Hide' : 'Show') + ' ownership and audit log ' + (INFO_OPEN ? '▴' : '▾'); }
 function render() {
   charts.forEach(c => c.destroy()); charts = [];
   const d = D, a = d.approval, src = d.source, ready = d.tiles.filter(t => t.state === 'ready'), hasData = ready.length > 0;
   $('title').textContent = d.title; document.title = d.title;
-  $('meta').textContent = `Generated from approved spec ${d.proposal_id} · “${d.request}”`;
+  $('meta').textContent = `Built from approved request ${d.proposal_id}: “${d.request}”`;
   $('policy').textContent = policyLine(d.change_policy);
   $('badge').hidden = false;
   const derived = d.change_policy && d.change_policy.mode === 'derive' ? d.change_policy.derived_from : null;
   const built = derived ? 'Derived from ' + derived + ' (unchanged)' : src.asset ? src.asset.asset_id + ' ' + src.asset.name : src.model ? src.model.model_id + ' ' + src.model.name : 'New, on a shared governed model';
-  const kpiOwners = [...new Set(d.tiles.map(t => t.kpi_owner).filter(Boolean))], assetOwner = src.asset && src.asset.owner;
-  const trail = AUDIT && AUDIT.entries ? `<section><div class="row" style="margin-bottom:.7em"><h2>Decision trail</h2><span class="chip" style="background:${AUDIT.chain_valid ? 'var(--ok-bg)' : 'var(--alert-bg)'};color:${AUDIT.chain_valid ? 'var(--ok)' : 'var(--alert)'};font-weight:800">${AUDIT.chain_valid ? '✓ Chain intact' : '✕ Tampered'}</span></div>
+  const trail = AUDIT && AUDIT.entries ? `<section><div class="row head"><h2>Decision trail</h2><span class="chip st ${AUDIT.chain_valid ? 'ok' : 'bad'}">${AUDIT.chain_valid ? '✓ Audit log intact' : '✕ Audit log altered'}</span></div>
       <div class="scroll"><table class="trail"><tr><th>When</th><th>Who</th><th>What happened</th><th>Hash</th></tr>${AUDIT.entries.map(e => `<tr><td>${esc(e.ts.replace('T', ' ').slice(0, 19))}</td><td>${esc(e.actor)}</td><td><b>${esc(String(e.event).replace(/_/g, ' '))}</b></td><td class="hash">${esc(String(e.hash).slice(0, 12))}…</td></tr>`).join('')}</table></div>
-      <div class="small" style="margin-top:.6em">If this dashboard is ever questioned: who asked for it, what evidence was shown, who approved it and who owns it are all recorded here and cannot be edited without breaking the chain.</div></section>` : '';
+      <div class="small note">If this dashboard is ever questioned: who asked for it, what evidence was shown, who approved it and who owns it are all recorded here and cannot be edited without breaking the chain.</div></section>` : '';
   // Contacts, freshness, warnings and lifecycle come from the engine and are read from the pack at view time.
   const W = d.warnings || [], C = d.contacts || [], LC = d.lifecycle, FR = d.freshness;
   const warnBox = W.length ? `<div class="warnbox"><h3>Check before relying on this dashboard</h3><ul>${W.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : '';
   const stChip = s => s === 'active' ? '<span class="chip st ok">active</span>' : s === 'inactive' ? '<span class="chip st bad">no longer active</span>' : '<span class="chip st bad">no owner recorded</span>';
   const contactsHtml = C.length ? `<div class="who"><h3>If it breaks or looks wrong, ask</h3><div class="contacts">${C.map(c => `<div class="contact${c.status !== 'active' ? ' off' : ''}">
       <div class="role">${esc(c.role)}</div><b>${esc(c.name || 'Nobody recorded')}</b> ${stChip(c.status)}
-      <div class="small" style="margin:.2em 0 0">${esc(c.owner_role || '')}${c.email ? ' · ' + esc(c.email) : ''}</div><div class="small" style="margin:.2em 0 0">${esc(c.why || '')}</div></div>`).join('')}</div>
-      <div class="small" style="margin:.6em 0 0">Read from the data pack every time this page opens, so a person who has left is flagged. Emails are synthetic. No on-call or escalation system is claimed.</div></div>` : '';
-  const sub = t => `<span class="small" style="display:block;margin:0">${t}</span>`;
-  const lifecycleHtml = LC ? `<section><h2>Lifecycle</h2><div class="facts">
+      <div class="small tight">${esc(c.owner_role || '')}${c.email ? ', ' + esc(c.email) : ''}</div><div class="small tight">${esc(c.why || '')}</div></div>`).join('')}</div>
+      <div class="small note">Read from the data pack every time this page opens, so a person who has left is flagged.</div></div>` : '';
+  const sub = t => `<span class="small" style="display:block">${t}</span>`;
+  const lifecycleHtml = LC ? `<section><h2>Review and upkeep</h2><div class="facts">
       <div class="fact"><small>State</small><b>${esc(LC.state)}</b></div>
       <div class="fact"><small>Review due</small><b>${esc(LC.review_due)}</b>${sub(esc(LC.review_policy))}</div>
       ${LC.usage ? `<div class="fact"><small>Use, last 3 months</small><b>${esc(LC.usage.avg_monthly_users_3m)} users a month</b>${sub(esc(LC.usage.source) + '; low-use cutoff ' + esc(LC.usage.estate_low_use_cutoff) + ' (judgement call)')}</div>` : ''}
       ${FR ? `<div class="fact"><small>Data refresh</small><b${FR.refresh_status === 'healthy' ? '' : ' style="color:var(--alert)"'}>${esc(FR.refresh_status)}</b>, ${esc(FR.refresh_frequency)}${sub(esc(FR.model_id) + ' ' + esc(FR.model_name))}</div>` : ''}</div>
-      ${LC.retire_signal ? `<div class="warnbox" style="margin-top:1em"><h3>Retire signal</h3><div>${esc(typeof LC.retire_signal === 'string' ? LC.retire_signal : JSON.stringify(LC.retire_signal))}</div></div>` : ''}
-      <div class="small" style="margin-top:.6em">Review period and low-use cutoff are our assumptions, not Bayer policy. <a href="/trace/${encodeURIComponent(d.proposal_id)}">Trace this dashboard →</a></div></section>` : '';
+      ${LC.retire_signal ? `<div class="warnbox gap"><h3>Retire signal</h3><div>${esc(typeof LC.retire_signal === 'string' ? LC.retire_signal : JSON.stringify(LC.retire_signal))}</div></div>` : ''}
+      <div class="small note"><a href="/trace/${encodeURIComponent(d.proposal_id)}">Trace this dashboard</a></div></section>` : '';
   const nW = W.length;
-  const strip = `<div class="strip"><span>Approved by <b>${esc(a.name)}</b> · accountable owner <b>${esc(a.accountable_owner || 'none named')}</b></span>
-    <span class="row">${nW ? `<button class="chipbtn" onclick="toggleInfo(true)">▲ ${nW} warning${nW === 1 ? '' : 's'}</button>` : ''}
+  const strip = `<div class="strip"><span>${FR ? `Data refreshed ${esc(FR.refresh_frequency)}, ${esc(FR.refresh_status)}. ` : ''}Approved by <b>${esc(a.name)}</b>. Accountable owner: <b>${esc(a.accountable_owner || 'none named')}</b>.</span>
+    <span class="row">${nW ? `<button class="chipbtn" onclick="toggleInfo(true)">⚠ ${nW} warning${nW === 1 ? '' : 's'} to check</button>` : ''}
     ${todoPanel(d) ? `<button class="tog todobtn" id="todobtn" aria-expanded="${TODO_OPEN}" aria-controls="todo" onclick="toggleTodo()">${todoLabel(d)}</button>` : ''}
-    <button class="tog" id="infobtn" aria-expanded="${INFO_OPEN}" aria-controls="info" onclick="toggleInfo()">${INFO_OPEN ? 'Hide' : 'Show'} ownership, lifecycle and audit ${INFO_OPEN ? '▴' : '▾'}</button></span></div>`;
-  // The dashboard itself comes first; accountability, lifecycle and audit are one click away.
+    <button class="tog" id="infobtn" aria-expanded="${INFO_OPEN}" aria-controls="info" onclick="toggleInfo()">${infoLabel()}</button></span></div>`;
+  // The dashboard itself comes first; accountability, review and the audit log are one click away.
   $('main').innerHTML = `${strip}
     ${todoPanel(d)}
     ${d.data_note ? `<div class="small">${esc(d.data_note)}</div>` : ''}
-    <section><div class="row" style="margin-bottom:.7em"><h2>${VIEW === 'overview' ? 'Overview' : 'KPIs'}</h2>${hasData ? `<div class="seg" role="group" aria-label="View">${[['overview', 'Overview'], ['charts', 'Charts'], ['table', 'Table']].map(([k, l]) => `<button class="${VIEW === k ? 'on' : ''}" aria-pressed="${VIEW === k}" onclick="setView('${k}')">${l}</button>`).join('')}</div>` : ''}</div>
-      ${VIEW === 'table' && hasData ? tableView(d) : VIEW === 'overview' && hasData ? overviewHtml(d) : `${cmpHtml(d)}<div class="cards">${d.tiles.map(card).join('')}</div>`}</section>
+    <section>${hasData && takeaway(d) ? `<p class="takeaway">${esc(takeaway(d))}</p>` : ''}${hasData ? `<div class="row head"><div class="seg" role="group" aria-label="View">${[['overview', 'Overview'], ['charts', 'Charts'], ['table', 'Table']].map(([k, l]) => `<button class="${VIEW === k ? 'on' : ''}" aria-pressed="${VIEW === k}" onclick="setView('${k}')">${l}</button>`).join('')}</div></div>` : ''}
+      ${!d.tiles.length ? '<div class="empty"><b>No data for this period</b>The data pack has nothing for this request yet. Check back after the next data refresh, or ask the factory to rebuild it.</div>' : VIEW === 'table' && hasData ? tableView(d) : VIEW === 'overview' && hasData ? overviewHtml(d) : `${cmpHtml(d)}<div class="cards">${d.tiles.map(card).join('')}</div>`}</section>
     <div id="info" class="infopanel"${INFO_OPEN ? '' : ' hidden'}>
     ${warnBox}<section><h2>Accountability</h2><div class="facts">
       ${PROP ? `<div class="fact"><small>Asked by</small><b>${esc(PROP.requester)}</b>, ${esc(String(PROP.created).slice(0, 10))}</div>` : ''}
@@ -308,7 +355,8 @@ function render() {
       ${contactsHtml}</section>
     ${lifecycleHtml}
     <section><h2>Governance rules applied</h2><div class="rules">${Object.entries(d.rules || {}).map(([k, v]) => `<span>${esc(k)} ${esc(v)}</span>`).join('')}</div></section>
-    ${trail}</div>`;
+    ${trail}
+    <p class="small">About this prototype: contact emails are synthetic and no on-call or escalation system is claimed. The review period and low-use cutoff are our assumptions, not Bayer policy. The factory builds and records the dashboard; telling people and certifying it is a step for them.</p></div>`;
   if (VIEW === 'table' && hasData) return;
   initComparisons(d);
   document.querySelectorAll('canvas[data-i]').forEach(cv => {
@@ -321,12 +369,12 @@ function render() {
     }
     if (t.chart_type === 'bar' && t.breakdown) { // snapshot tile: share of routes that are red, per product or market
       const bd = t.breakdown;
-      charts.push(new Chart(cv, { type: 'bar',
+      charts.push(new Chart(cv, { type: 'bar', plugins: [barLabels],
         data: { labels: bd.map(x => x.label), datasets: [{ data: bd.map(x => x.share_pct), backgroundColor: '#C8003Fb3', borderRadius: 4 }] },
         options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: {
             title: c => bd[c[0].dataIndex].label,
             label: c => { const x = bd[c.dataIndex]; return `${x.label}: ${x.red} of ${x.total} routes red (${Math.round(x.share_pct)}%)`; } } } },
-          scales: { y: { display: false, min: 0 }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 0, font: { size: 11 } } } } } }));
+          scales: { y: { display: false, min: 0, grace: '15%' }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 0, font: { size: 11 } } } } } }));
       return;
     }
     // Scale the axis to the series (and the target line, if any) so the line agrees with the change arrow.
@@ -337,9 +385,9 @@ function render() {
     if (t.target != null) datasets.push({ data: vs.map(() => t.target), borderColor: '#35566A', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false });
     const targetLabel = { id: 'targetLabel', afterDatasetsDraw(c) { if (t.target == null) return; const x = c.ctx; x.save(); x.font = '800 12px Figtree, system-ui, sans-serif'; x.fillStyle = '#35566A'; x.textAlign = 'left';
       x.fillText('dashed: ' + (t.target_label || 'target') + ' ' + fmt(t.target, t.unit), c.chartArea.left, 10); x.restore(); } };
-    charts.push(new Chart(cv, { type: 'line', plugins: [targetLabel],
+    charts.push(new Chart(cv, { type: 'line', plugins: [targetLabel, endLabelFor(t)],
       data: { labels: s.map(x => x.month), datasets },
-      options: { maintainAspectRatio: false, layout: { padding: { top: t.target != null ? 16 : 0 } }, interaction: { mode: 'index', intersect: false },
+      options: { maintainAspectRatio: false, layout: { padding: { top: 24, right: 8 } }, interaction: { mode: 'index', intersect: false },
         plugins: { legend: { display: false }, tooltip: { filter: c => c.datasetIndex === 0, callbacks: { label: c => fmt(c.parsed.y, t.unit) } } },
         scales: { y: { display: false, min: lo - pad, max: hi + pad }, x: { grid: { display: false }, ticks: { maxTicksLimit: 4 } } } } }));
   });
@@ -350,17 +398,16 @@ const WHO_LABEL = { requester: 'Whoever runs this request', asset_owner: 'Owner 
 const WHO_ORDER = ['requester', 'asset_owner', 'kpi_owner', 'steward', 'bi_team', 'approver'];
 function steps(d) { return Array.isArray(d.next_steps) ? { todo: d.next_steps.filter(x => x.status === 'todo'), done: d.next_steps.filter(x => x.status === 'done'), tagged: true }
   : { todo: (d.required_actions || []).map(t => ({ text: t, who: null, status: 'todo' })), done: [], tagged: false }; }
-function todoLabel(d) { const n = steps(d).todo.length; return (TODO_OPEN ? 'Hide' : 'Show') + ' ' + (n ? 'next steps before go-live · ' + n : 'next steps: nothing left to do') + ' ' + (TODO_OPEN ? '▴' : '▾'); }
+function todoLabel(d) { const n = steps(d).todo.length; return (TODO_OPEN ? 'Hide' : 'Show') + ' next steps' + (n ? ' (' + n + ')' : '') + ' ' + (TODO_OPEN ? '▴' : '▾'); }
 function todoPanel(d) {
   const st = steps(d); if (!st.todo.length && !st.done.length) return '';
   const groups = st.tagged ? WHO_ORDER.map(w => [w, st.todo.filter(x => x.who === w)]).filter(([, a]) => a.length).concat(st.todo.some(x => !WHO_ORDER.includes(x.who)) ? [['other', st.todo.filter(x => !WHO_ORDER.includes(x.who))]] : [])
     : [['other', st.todo]];
   const body = groups.map(([w, a]) => { const names = ['asset_owner', 'kpi_owner'].includes(w) ? [...new Set(a.map(x => x.who_name).filter(Boolean))] : [];
-    return `<div class="stepgrp">${w === 'other' ? '' : `<div class="stepwho">${esc(WHO_LABEL[w])}${names.length ? ' · ' + names.map(esc).join(', ') : ''}</div>`}<ul>${a.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul></div>`; }).join('');
+    return `<div class="stepgrp">${w === 'other' ? '' : `<div class="stepwho">${esc(WHO_LABEL[w])}${names.length ? ': ' + names.map(esc).join(', ') : ''}</div>`}<ul>${a.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul></div>`; }).join('');
   return `<div id="todo" class="todopanel"${TODO_OPEN ? '' : ' hidden'}><h2>Next steps before go-live</h2>
     ${body || '<p style="margin:0">Nothing left for anyone to do.</p>'}
-    ${st.done.length ? `<p class="small" style="margin:.8em 0 0"><b>Done by the factory:</b> ${st.done.map(x => esc(x.text)).join(' · ')}</p>` : ''}
-    <p class="small" style="margin:.5em 0 0">In this prototype the factory builds and records; telling people and certifying is a step for them.</p></div>`;
+    ${st.done.length ? `<p class="small note"><b>Done by the factory:</b> ${st.done.map(x => esc(x.text)).join(' · ')}</p>` : ''}</div>`;
 }
 function toggleTodo() {
   TODO_OPEN = !TODO_OPEN; $('todo').hidden = !TODO_OPEN; const b = $('todobtn');
@@ -369,18 +416,18 @@ function toggleTodo() {
 function toggleInfo(forceOpen) {
   INFO_OPEN = forceOpen === true ? true : !INFO_OPEN;
   $('info').hidden = !INFO_OPEN; const b = $('infobtn');
-  b.setAttribute('aria-expanded', INFO_OPEN); b.textContent = (INFO_OPEN ? 'Hide' : 'Show') + ' ownership, lifecycle and audit ' + (INFO_OPEN ? '▴' : '▾');
-  if (INFO_OPEN) $('info').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  b.setAttribute('aria-expanded', INFO_OPEN); b.textContent = infoLabel();
+  if (INFO_OPEN) $('info').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'start' });
 }
 function load() {
   skeleton();
   const side = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null); // who asked + audit trail; page still works without them
   fetch('/api/dashboards/' + encodeURIComponent(pid)).then(async r => {
     const b = await r.json().catch(() => ({}));
-    if (!r.ok) { $('title').textContent = 'No dashboard yet'; $('main').innerHTML = `<div class="error"><b>Not generated.</b> ${esc(b.detail || 'Server answered ' + r.status)}</div>`; return; }
+    if (!r.ok) { $('title').textContent = 'Dashboard not available'; $('main').innerHTML = `<div class="error"><b>This dashboard could not be opened.</b> ${esc(b.detail || 'The server returned error ' + r.status + '.')} Try again, or open another one from My dashboards. <button onclick="load()">Try again</button></div>`; return; }
     [PROP, AUDIT] = await Promise.all([side('/api/proposals/' + encodeURIComponent(pid)), side('/api/audit?proposal_id=' + encodeURIComponent(pid))]);
     D = b; render();
-  }).catch(e => { $('title').textContent = 'Could not load'; $('main').innerHTML = `<div class="error"><b>Could not load this dashboard.</b> ${esc(e.message)} <button onclick="load()">Try again</button></div>`; });
+  }).catch(e => { $('title').textContent = 'Dashboard not available'; $('main').innerHTML = `<div class="error"><b>This dashboard could not be loaded.</b> The server did not answer (${esc(e.message)}). Check that the app is running, then try again. <button onclick="load()">Try again</button></div>`; });
 }
 load();
 </script>

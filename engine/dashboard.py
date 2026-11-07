@@ -16,7 +16,7 @@ import pandas as pd
 from . import governance as gov
 from . import lifecycle
 from .estate import load
-from .measures import UNGOVERNED, ungoverned_label
+from .measures import UNGOVERNED, direction, ungoverned_label
 from .supply import supply_risk
 from .recommend import _features
 
@@ -145,6 +145,7 @@ def _ready(metric, kpi_id, unit, pts, note, governed, origin, extra=None):
             "frequency": "monthly", "criticality": "high" if governed else "not rated",
             "value": vals[-1], "previous": vals[-2] if len(vals) > 1 else vals[-1],
             "change_basis": "absolute" if signed else "percent",   # UI: show the absolute change when 'absolute'
+            "direction": direction(metric),   # higher_is_better | lower_is_better | None (neutral): decides green/red
             "series": [{"month": m, "value": v} for m, v in pts], **(extra or {})}
 
 
@@ -178,6 +179,7 @@ def supply_tiles(products: list[str], markets: list[str]) -> list[dict]:
         "criticality": "not rated", "kpi_owner": None, "conflicting_variants": 0, "slice": None,
         "data_note": f"the pack's own risk label (Supply_Operations), routes the product is not sold on ignored · {where}",
         "value": r["red"], "value_label": f"of {r['total']} routes", "previous": r["red"], "change_basis": "none",
+        "direction": direction("Routes at red risk"),
         "breakdown": r["breakdown"], "breakdown_by": r["by"], "breakdown_unit": "% of routes red",
         "chart_type": "bar", "series": [{"month": b["label"], "value": b["share_pct"]} for b in r["breakdown"]]}]
     for w in r["worst"]:
