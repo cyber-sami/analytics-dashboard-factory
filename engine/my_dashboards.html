@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My dashboards</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B2D3E;--blue:#0068A8;--green:#5DBB46;--bg:#F4F8FB;--card:#fff;--ink:#0B2D3E;--muted:#35566A;--line:#D5E2EB;--alert:#C8003F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Figtree",system-ui,"Segoe UI",sans-serif}
+header{background:linear-gradient(90deg,#0B2D3E,#0068A8 70%,#00B3B8);color:#fff;padding:20px 28px}
+header h1{margin:0;font-size:1.7rem;font-style:italic;font-weight:800}
+header p{margin:.2em 0 .7em;opacity:.9;max-width:60em}
+.nav a{display:inline-block;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:999px;padding:.3em 1em;margin-right:.5em}
+main{max-width:1240px;margin:0 auto;padding:18px 28px 60px}
+.bar{display:flex;flex-wrap:wrap;gap:.8em 1.4em;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7em 1em}
+.bar label{font-size:.85rem;color:var(--muted);font-weight:600}
+.bar input[type=text]{font:inherit;border:1px solid var(--line);border-radius:8px;padding:.3em .6em;width:11em}
+.count{margin-left:auto;color:var(--muted);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:.45em}
+.card.decision{background:#fbfdfe;border-style:dashed}
+.card.arch{opacity:.7}
+.top{display:flex;justify-content:space-between;gap:.6em;align-items:flex-start}
+.name{font-weight:800;font-size:1.08rem;line-height:1.25;margin:0;word-break:break-word}
+.chip{display:inline-block;border-radius:999px;font-size:.74rem;font-weight:800;padding:.12em .7em;white-space:nowrap}
+.req{color:var(--muted);font-size:.9rem;border-left:3px solid var(--line);padding-left:.6em}
+.meta{font-size:.82rem;color:var(--muted)}
+.badges{display:flex;flex-wrap:wrap;gap:.4em}
+.b{font-size:.75rem;font-weight:700;border-radius:999px;padding:.1em .65em;border:1px solid var(--line);background:#fff}
+.b.warn{color:var(--alert);border-color:var(--alert);background:#fff0f3}
+.spark{height:46px;width:100%}
+.btns{display:flex;flex-wrap:wrap;gap:.5em;margin-top:auto;padding-top:.3em}
+a.btn,button.btn{font:inherit;font-size:.88rem;font-weight:700;border-radius:9px;padding:.35em .9em;cursor:pointer;text-decoration:none;border:1px solid var(--blue);background:#fff;color:var(--blue)}
+a.btn.pri{background:var(--blue);color:#fff}
+button.link{font:inherit;font-size:.8rem;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+.empty{margin:2.5em auto;text-align:center;color:var(--muted);max-width:30em}
+.empty a{color:var(--blue);font-weight:700}
+.rename{display:flex;gap:.4em}
+.rename input{font:inherit;flex:1;border:1px solid var(--blue);border-radius:8px;padding:.25em .5em}
+</style></head><body>
+<header>
+  <h1>My dashboards</h1>
+  <p>Every dashboard you built with the factory and had approved is saved here. It stays after you start a new request or refresh the page. Nothing is ever deleted: archiving only hides it, and the decision and audit trail stay.</p>
+  <div class="nav"><a href="/pipeline">← Back to the factory</a><a href="/">Supply operations overview</a></div>
+</header>
+<main>
+  <div class="bar">
+    <label>Your name <input type="text" id="who" placeholder="show everyone's"></label>
+    <label><input type="checkbox" id="mine"> only mine</label>
+    <label><input type="checkbox" id="arch"> show archived</label>
+    <span class="count" id="count"></span>
+  </div>
+  <div id="list" class="grid"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const V = {REUSE: ['Reuse', '#5DBB46', '#0B2D3E'], EXTEND: ['Extend', '#00B3B8', '#0B2D3E'], CONSOLIDATE: ['Consolidate', '#4DB8F5', '#0B2D3E'],
+  MIGRATE: ['Migrate', '#0B2D3E', '#fff'], RETIRE: ['Retire', '#C8003F', '#fff'], NEW_BUILD: ['Build new', '#0068A8', '#fff']};
+const store = {get: k => { try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }};
+let items = [];
+function spark(p) {
+  if (!p || !p.values || p.values.length < 2) return '';
+  const v = p.values, lo = Math.min(...v), hi = Math.max(...v), r = (hi - lo) || 1, W = 300, H = 46;
+  const pts = v.map((x, i) => `${(i * (W - 6) / (v.length - 1) + 3).toFixed(1)},${(H - 5 - (x - lo) / r * (H - 12)).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${esc(p.metric)} trend"><polyline points="${pts}" fill="none" stroke="#0068A8" stroke-width="2" stroke-linejoin="round"/></svg>`;
+}
+function fmtDate(s) { return s ? new Date(s).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}) : ''; }
+function card(i) {
+  const [lab, bg, fg] = V[i.verdict] || [i.verdict, '#ccc', '#000'];
+  const dec = i.kind === 'decision';
+  return `<div class="card${dec ? ' decision' : ''}${i.archived ? ' arch' : ''}" data-id="${esc(i.proposal_id)}">
+    <div class="top"><h3 class="name">${esc(i.name)}</h3><span class="chip" style="background:${bg};color:${fg}">${esc(lab)}</span></div>
+    <div class="req">“${esc(i.request)}”</div>
+    ${dec ? '<div class="meta"><b>Retirement approved.</b> No dashboard is built: the asset is archived once its owner agrees and its users have moved.</div>' : spark(i.preview)}
+    <div class="meta">${dec ? '' : esc(i.preview ? i.preview.metric + ' · ' : '')}Asked by ${esc(i.requester)} · approved by ${esc(i.approved_by || '?')} on ${esc(fmtDate(i.approved_at))} · accountable owner ${esc(i.accountable_owner || '?')}</div>
+    <div class="badges">${dec ? '' : `<span class="b">${i.tiles} tile${i.tiles === 1 ? '' : 's'}</span>`}${i.warnings ? `<span class="b warn">▲ ${i.warnings} warning${i.warnings === 1 ? '' : 's'}</span>` : ''}${i.todo_count ? `<span class="b">${i.todo_count} next step${i.todo_count === 1 ? '' : 's'} for people</span>` : ''}${i.review_due ? `<span class="b">review by ${esc(i.review_due)}</span>` : ''}</div>
+    <div class="btns">${dec ? '' : `<a class="btn pri" href="${esc(i.url)}">Open dashboard</a>`}<a class="btn" href="${esc(i.trace_url)}">Trace this decision</a>
+      <button class="link" data-act="rename">Rename</button><button class="link" data-act="archive">${i.archived ? 'Restore' : 'Archive'}</button></div></div>`;
+}
+function render() {
+  $('list').innerHTML = items.length ? items.map(card).join('') : `<div class="empty" style="grid-column:1/-1"><h2>Nothing saved here yet</h2><p>${$('mine').checked ? 'No approved dashboards for this name.' : 'A dashboard is saved as soon as a person approves it.'} <a href="/pipeline">Ask the factory for one →</a></p></div>`;
+  $('count').textContent = items.length ? `${items.length} saved` : '';
+}
+async function load() {
+  const q = new URLSearchParams(); if ($('mine').checked && $('who').value.trim()) q.set('requester', $('who').value.trim()); if ($('arch').checked) q.set('archived', 'true');
+  try { const r = await fetch('/api/dashboards?' + q); items = r.ok ? await r.json() : []; } catch { items = []; }
+  render();
+}
+async function post(path, body) { const r = await fetch(path, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(body)}); const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.detail || r.status); return j; }
+$('list').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const el = b.closest('.card'), id = el.dataset.id, it = items.find(x => x.proposal_id === id), by = $('who').value.trim() || 'unknown';
+  if (b.dataset.act === 'archive') { try { await post(`/api/dashboards/${id}/archive`, {archived: !it.archived, by}); load(); } catch (err) { alert(err.message); } }
+  if (b.dataset.act === 'rename') {
+    const h = el.querySelector('.name'); h.outerHTML = `<form class="rename"><input value="${esc(it.name)}" maxlength="80" aria-label="New name"><button class="btn pri">Save</button></form>`;
+    const f = el.querySelector('.rename'); f.querySelector('input').focus();
+    f.addEventListener('submit', async ev => { ev.preventDefault(); try { await post(`/api/dashboards/${id}/rename`, {name: f.querySelector('input').value, by}); load(); } catch (err) { alert(err.message); } });
+  }
+});
+$('who').value = store.get('dfName') || new URLSearchParams(location.search).get('requester') || '';
+$('mine').checked = store.get('dfMine') === '1' && !!$('who').value;
+$('who').addEventListener('change', () => { store.set('dfName', $('who').value.trim()); load(); });
+$('mine').addEventListener('change', () => { store.set('dfMine', $('mine').checked ? '1' : ''); load(); });
+$('arch').addEventListener('change', load);
+load();
+</script></body></html>

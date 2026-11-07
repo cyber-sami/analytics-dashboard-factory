@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Supply operations overview</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Own palette, inspired by the Bayer brand (blue + green). Not official Bayer colours. */
+    --navy: #0B2D3E; --brand-blue: #0068A8; --brand-green: #5DBB46; --bg: #F4F8FB; --teal: #0B2D3E; --cta: #C8003F; --card: #ffffff; --ink: #0B2D3E; --muted: #35566A; --line: #D5E2EB;
+    --ok: #1a7f46; --ok-bg: #e3f6ea;
+    --warn: #0068A8; --warn-bg: #E8F3FA;
+    --alert: #C8003F; --alert-bg: #fde4e7;
+    --u: clamp(14px, 1vw, 22px); /* scales everything up on a wall screen */
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Figtree", system-ui, "Segoe UI", sans-serif; font-size: var(--u); font-weight: 400; font-variant-numeric: tabular-nums; }
+  b, h1, h2, .num, .value { font-weight: 800; }
+  header { background: linear-gradient(120deg, #0B2D3E 0%, #0068A8 60%, #00B3B8 100%); color: #fff; padding: 1.2em 2.4em; display: flex; align-items: center; justify-content: space-between; gap: 1em; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 1.8em; letter-spacing: -.01em; }
+  header .meta { opacity: .85; font-size: 1.25em; }
+  header .right { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; }
+  header a { color: #fff; text-decoration: none; font-weight: 800; background: #ffffff2e; border-radius: 99em; padding: .5em 1.2em; }
+  .badge { font-size: 1.15em; font-weight: 800; padding: .35em 1em; border-radius: 99em; background: #0B2D3E; border: .1em solid #ffffff55; }
+  .badge.clear { background: var(--ok); }
+  header h1 { font-style: italic; font-weight: 800; }
+  main { padding: 1.6em 2.4em 2.4em; display: grid; gap: 2em; }
+  h2 { margin: 0 0 .7em; font-size: 1em; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(14em, 1fr)); gap: 1.2em; }
+  .tile { border-radius: 1.25em; padding: 1.2em 1.4em; background: var(--card); border: .06em solid var(--line); }
+  .tile .label { font-size: 1.25em; color: var(--muted); font-weight: 800; }
+  .tile .num { font-size: 3.4em; line-height: 1.1; }
+  .tile .num small { font-size: .35em; margin-left: .2em; }
+  .tile .delta { font-size: 1em; color: var(--muted); margin: .2em 0 .5em; }
+  .tile .delta .worse, .tile .delta .better { color: var(--ink); font-weight: 800; }
+  .tile .state { display: inline-block; font-size: 1em; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; padding: .3em .9em; border-radius: 99em; }
+  .tile.l0 .state { background: #E3F6EA; color: var(--ok); }
+  .tile.l1 .state { background: #E8F3FA; color: var(--warn); }
+  .tile.l2 .state { background: var(--alert); color: #fff; }
+
+  .lines { display: flex; flex-wrap: wrap; gap: 1em; }
+  .pill { display: flex; align-items: center; gap: .6em; background: var(--card); border: .06em solid var(--line); border-radius: 99em; padding: .35em 1em .35em .4em; font-size: 1.05em; font-weight: 800; }
+  .pill i { width: 1.5em; height: 1.5em; border-radius: 50%; display: grid; place-items: center; color: #fff; font-style: normal; font-size: .8em; }
+  .pill small { color: var(--muted); font-weight: 400; font-size: 1em; }
+  .dot0 { background: var(--ok); } .dot1 { background: var(--warn); } .dot2 { background: var(--alert); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(18em, 1fr)); gap: 1.4em; }
+  .card { background: var(--card); border-radius: 1.25em; padding: 1.2em 1.4em; border: .06em solid var(--line); }
+  .card .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .card .line { font-size: 1.25em; font-weight: 800; color: var(--navy); }
+  .card .kpi { font-size: 1.25em; font-weight: 800; line-height: 1.25; margin: .5em 0 .1em; }
+  .card .value { font-size: 3.4em; line-height: 1.1; }
+  .card.l2 { border-left: .45em solid var(--alert); } .card.l1 { border-left: .45em solid var(--warn); }
+  .card.l2 .value { color: var(--alert); } .card.l1 .value { color: var(--warn); }
+  .card .value small { font-size: .35em; }
+  .card .take { color: var(--muted); font-size: 1em; margin-bottom: .5em; }
+  .card .chart { height: 6em; }
+  .card .cap { font-size: 1em; color: var(--muted); margin-top: .5em; }
+  .tag { font-size: 1em; font-weight: 800; padding: .2em .8em; border-radius: 99em; color: #fff; }
+  .tag.l1 { background: var(--warn); } .tag.l2 { background: var(--alert); }
+
+  .allclear { text-align: center; padding: 3em 1em; background: var(--ok-bg); border-radius: 1em; color: var(--ok); font-size: 2em; font-weight: 800; }
+  .skel { background: linear-gradient(90deg, #E8F3FA 25%, #F4F8FB 50%, #E8F3FA 75%); background-size: 200% 100%; animation: sh 1.2s infinite; border-radius: .9em; }
+  .skel.tile { height: 9em; border: 0; } .skel.card { height: 15em; border: 0; }
+  @keyframes sh { to { background-position: -200% 0; } }
+  .error { background: var(--alert-bg); border: .15em solid var(--alert); border-radius: .9em; padding: 1.4em 1.6em; font-size: 1.25em; }
+  .error button { font: inherit; font-weight: 800; margin-left: 1em; padding: .4em 1.2em; border-radius: .5em; border: 0; background: var(--alert); color: #fff; cursor: pointer; }
+  .empty { padding: 2em 1.4em; background: var(--card); border: .06em dashed var(--line); border-radius: 1.25em; color: var(--muted); }
+  .empty b { display: block; color: var(--ink); font-size: 1.25em; }
+  .tile.ln .state { background: var(--mist); color: var(--muted); }
+  .small { color: var(--muted); font-size: .95em; }
+  .purpose { font-size: .95em; opacity: .8; margin-top: .25em; max-width: 52em; }
+  .promptbox { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .8em 1.2em; background: var(--card); border: .06em solid var(--line); border-radius: 1em; padding: .8em 1.1em; }
+  .promptbox code { font-family: ui-monospace, monospace; font-size: .95em; color: var(--ink); flex: 1 1 24em; line-height: 1.5; }
+  .pbtns { display: flex; gap: .6em; flex-wrap: wrap; } .pbtns button, .pbtn { font: inherit; font-weight: 800; border-radius: .6em; padding: .4em 1.1em; cursor: pointer; text-decoration: none; border: .1em solid var(--brand-blue); background: #fff; color: var(--brand-blue); }
+  .pbtn { background: var(--brand-blue); color: #fff; }
+  .foot { color: var(--muted); font-size: .9em; }
+  header .stale { background: #ffffff2e; border-radius: 99em; padding: .1em .7em; margin-left: .4em; font-weight: 800; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1 id="h1">Loading…</h1><div class="meta" id="meta"></div><div class="meta purpose" id="purpose"></div></div>
+  <div class="right">
+    <a href="/my-dashboards">My dashboards</a>
+    <a href="/pipeline">How dashboards get made →</a>
+    <div class="badge" id="badge" hidden></div>
+  </div>
+</header>
+<main>
+  <section><h2 id="tiles-title">Portfolio overview</h2><div class="tiles" id="tiles"></div></section>
+  <section><h2>Products</h2><div class="lines" id="lines"></div></section>
+  <section><h2 id="attn-title">Needs attention this month</h2><div class="small" id="attn-sub" style="margin:-.3em 0 .8em"></div><div class="cards" id="cards"></div></section>
+  <section class="make"><h2>Make this view with the factory</h2>
+    <div class="small" style="margin:-.3em 0 .6em">This prompt rebuilds the numbers on this page in a generated dashboard. Paste it into the factory, or open it there with the prompt filled in.</div>
+    <div class="promptbox"><code id="prompt">Show on-time in full, inventory coverage and units shipped for all Pharma, plus the routes at red supply risk</code>
+      <span class="pbtns"><button type="button" id="copybtn" onclick="copyPrompt()">Copy</button><a class="pbtn" id="openlink" href="/pipeline">Open in the factory →</a></span></div></section>
+  <div class="foot" id="foot"></div>
+</main>
+<script>
+const STATE = ['On track', 'Watch', 'Red risk']; // red/amber/green are the data pack's own risk labels
+const ICON = ['✓', '▲', '✕'];
+const COLOR = ['#1a7f46', '#0068A8', '#C8003F'];
+Chart.defaults.font.family = '"Figtree", system-ui, sans-serif'; Chart.defaults.color = '#35566A';
+const $ = id => document.getElementById(id);
+const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = n => Number.isInteger(n) ? n : n.toFixed(1);
+// Big counts read as 5.2M / 190k; everything else keeps one decimal.
+const compact = n => { const a = Math.abs(n); return a >= 1e6 ? +(n / 1e6).toFixed(1) + 'M' : a >= 1e4 ? Math.round(n / 1e3) + 'k' : fmt(n); };
+const fmtU = (n, unit) => unit === 'units' ? compact(n) : fmt(n);
+const sign = (n, unit) => (n > 0 ? '+' : n < 0 ? '−' : '±') + fmtU(Math.abs(n), unit);
+let charts = [];
+const dayFmt = (iso, o) => new Date(iso + 'T12:00:00').toLocaleDateString('en-GB', o);
+const empty = msg => `<div class="empty" style="grid-column:1/-1"><b>No data for this period</b>${msg}</div>`;
+// Draws the last value and the target label straight on the sparkline (no axes, no legend).
+const endLabel = { id: 'endLabel', afterDatasetsDraw(chart) {
+  const { ctx } = chart, pts = chart.getDatasetMeta(0).data, tgt = chart.getDatasetMeta(1).data[0], last = pts[pts.length - 1];
+  ctx.save(); ctx.font = '800 13px Figtree, system-ui, sans-serif';
+  ctx.fillStyle = chart.data.datasets[0].borderColor; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.fillText((fmtU(chart.data.datasets[0].data.at(-1), chart.options.unit) + ' ' + chart.options.unit).trim(), last.x + 4, last.y - 9);
+  ctx.fillStyle = '#35566A'; ctx.textAlign = 'left';
+  ctx.fillText('dashed: ' + chart.options.targetLabel + ' ' + fmtU(chart.options.target, chart.options.unit), chart.chartArea.left, 12); // pinned top-left so it never sits on the line
+  ctx.restore(); } };
+
+function skeleton() {
+  $('tiles').innerHTML = '<div class="skel tile"></div>'.repeat(4);
+  $('lines').innerHTML = '<div class="skel" style="width:9em;height:3em"></div>'.repeat(4);
+  $('cards').innerHTML = '<div class="skel card"></div>'.repeat(3);
+}
+
+function showError(err) {
+  $('h1').textContent = 'Could not load'; $('meta').textContent = '';
+  $('tiles').innerHTML = `<div class="error" style="grid-column:1/-1"><b>Could not load this month's numbers.</b> ${err.message}
+    <button onclick="load()">Try again</button></div>`;
+  $('lines').innerHTML = ''; $('cards').innerHTML = '';
+}
+
+function render(d) {
+  charts.forEach(c => c.destroy()); charts = [];
+  const L = d.labels || {};
+  // Our own page title: the engine's name is a sentence; this one says what the page is.
+  $('h1').textContent = 'Supply operations overview'; document.title = 'Supply operations overview';
+  $('meta').textContent = `${L.period} · for ${d.audience.toLowerCase()}`;
+  $('purpose').textContent = 'A reference view of a finished supply dashboard, built directly from the synthetic data pack. The factory can rebuild this view from a prompt.';
+  $('tiles-title').textContent = `Portfolio, ${L.period}`;
+  const noTarget = d.tiles.filter(t => t.status_basis === 'none').map(t => t.kpi.toLowerCase());
+  $('foot').textContent = (L.source || '') + (noTarget.length ? ` ${noTarget.join(', ').replace(/^./, c => c.toUpperCase())}: no target in the pack, so no status is shown.` : '');
+  const badge = $('badge'); badge.hidden = false;
+  badge.textContent = d.all_clear ? '✓ All clear' : `${d.attention_count} ${(L.entity || 'route').toLowerCase()}s at red risk`;
+  badge.className = 'badge' + (d.all_clear ? ' clear' : '');
+
+  $('tiles').innerHTML = !d.tiles.length ? empty('Numbers appear after the next data refresh.') : d.tiles.map(t => {
+    const worse = (t.direction === 'lower_is_better') === (t.delta > 0);
+    const cue = t.delta !== 0 && worse ? '<span class="worse">worse</span> ' : '';
+    const none = t.status_basis === 'none'; // the pack has no target for this KPI, so no status is claimed (explained once in the footnote)
+    return `<div class="tile ${none ? 'ln' : 'l' + t.level}"><div class="label">${t.kpi}</div>
+      <div class="num">${fmtU(t.value, t.unit)}<small>${t.unit}</small></div>
+      <div class="delta">${t.delta > 0 ? '▲' : t.delta < 0 ? '▼' : '■'} ${sign(t.delta, t.unit)}${/^of /.test(t.unit) ? '' : ' ' + t.unit} ${L.delta} ${cue}</div>
+      ${none || t.level === 2 ? '' : `<div class="state">${ICON[t.level]} ${STATE[t.level]}</div>`}</div>`;
+  }).join('');
+
+  $('lines').innerHTML = !d.lines.length ? empty('No products reported yet.') : d.lines.map(l => { const pct = (/^\d+%/.exec(l.product || '') || [''])[0];
+    return `<div class="pill" title="${esc(l.line + ': ' + l.product + ' · ' + STATE[l.level])}"><i class="dot${l.level}">${ICON[l.level]}</i>${l.line}${pct ? ` <small>${pct} red</small>` : ''}</div>`; }).join('');
+
+  const cards = $('cards');
+  if (d.all_clear) { $('attn-title').hidden = true; $('attn-sub').textContent = ''; cards.innerHTML = '<div class="allclear" style="grid-column:1/-1">✓ Everything on track this month</div>'; return; }
+  $('attn-title').hidden = false;
+  $('attn-title').textContent = d.items.length < d.attention_count ? `Most urgent: ${d.items.length} of ${d.attention_count}` : 'Needs attention this month';
+  $('attn-sub').textContent = `${(L.entity || 'Route')}s the data pack marks red, lowest ${d.items[0] ? d.items[0].kpi.toLowerCase() : 'value'} first. Red is the pack's own risk label.`;
+  cards.innerHTML = '';
+  if (!d.items.length) { cards.innerHTML = empty('Nothing to show here. Check back after the next refresh.'); return; }
+  d.items.forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'card l' + it.level;
+    const gap = it.value - it.target;
+    el.innerHTML = `<div class="top"><span class="line">${it.line}</span></div>
+      <div class="kpi">${it.kpi}, ${L.trend.toLowerCase()}</div>
+      <div class="value">${fmtU(it.value, it.unit)}<small> ${it.unit}</small></div>
+      <div class="take">${fmtU(Math.abs(gap), it.unit)} ${it.unit === '%' ? 'pts' : it.unit} ${gap < 0 ? 'below' : 'above'} the ${L.target} · usually ${fmtU(it.baseline, it.unit)} ${it.unit}</div>
+      <div class="chart"><canvas role="img" aria-label="${it.kpi} for ${it.line}: now ${fmtU(it.value, it.unit)} ${it.unit}, ${L.target} ${fmtU(it.target, it.unit)} ${it.unit}. ${L.trend} trend."></canvas></div>`;
+    cards.appendChild(el);
+    const col = COLOR[it.level], vals = it.trend.map(t => t.value);
+    // Fit the axis to the series and the target (not from zero) so the line shows the real movement.
+    const lo = Math.min(it.target, ...vals), hi = Math.max(it.target, ...vals), pad = (hi - lo) * 0.18 || Math.abs(hi) * 0.05 || 1;
+    charts.push(new Chart(el.querySelector('canvas'), {
+      type: 'line', plugins: [endLabel],
+      data: { labels: it.trend.map(t => t.date), datasets: [
+        { data: vals, borderColor: col, backgroundColor: col + '22', fill: true, tension: .3, borderWidth: 2.5,
+          pointRadius: vals.map((_, k) => k === vals.length - 1 ? 5 : 0), pointHoverRadius: 5 },
+        { data: vals.map(() => it.target), borderColor: '#35566A', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false }] },
+      options: { unit: it.unit, target: it.target, targetLabel: L.target, maintainAspectRatio: false, layout: { padding: { top: 18, right: 6 } }, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { filter: c => c.datasetIndex === 0, callbacks: {
+          title: c => dayFmt(c[0].label, { month: 'long', year: 'numeric' }),
+          label: c => `${fmtU(c.parsed.y, it.unit)} ${it.unit}` } } },
+        scales: { y: { display: false, min: lo - pad, max: hi + pad }, x: { display: false } } }
+    }));
+  });
+}
+
+// The prompt that makes this view in the factory: copy it, or open the factory with it filled in.
+function copyPrompt() {
+  const t = $('prompt').innerText, b = $('copybtn'), done = () => { b.textContent = 'Copied ✓'; setTimeout(() => b.textContent = 'Copy', 1800); };
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(done).catch(() => { const r = document.createRange(); r.selectNodeContents($('prompt')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { document.execCommand('copy'); done(); } catch (e) { b.textContent = 'Select and copy'; } });
+}
+$('openlink').href = '/pipeline?prompt=' + encodeURIComponent($('prompt').innerText);
+function load() {
+  skeleton();
+  fetch('/api/home')
+    .then(r => { if (!r.ok) throw new Error('Server answered ' + r.status); return r.json(); })
+    .then(render).catch(showError);
+}
+load();
+</script>
+</body>
+</html>
