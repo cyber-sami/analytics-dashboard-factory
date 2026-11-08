@@ -12,20 +12,25 @@ Can we have a new dashboard for net sales and forecast variance for Kerendia?
 ```
 Point at: the evidence, "New dashboard derived from AST-0218, which stays unchanged for its users", then approve. Try approving with "— choose a person —" as accountable owner to show the block, then pick one, approve, open the generated dashboard, and show the trace.
 
-**2. RETIRE: the best dashboard is the one you don't build**
+**2. EXTEND: normal language, no product names (the second demo in the video)**
+```
+Compare the sales of cardiovascular medicines
+```
+Point at: you don't need to remember product names. "Cardiovascular medicines" is a group the pack knows (Kerendia, Xarelto, Beyonttra), so no question is asked and the verdict is EXTEND (same with Gemini on or off, checked 8 Nov): it builds on AST-0191 (a dashboard that only covers Xarelto) and leaves it unchanged. Approve it and open the dashboard: three tiles, one per product (never added into one number), and a Comparison chart with three lines. Press Indexed: every line starts at 100, so the movement can be compared even when the levels differ. Today's numbers: Kerendia about €378M (up), Xarelto about €297M (up), Beyonttra about €91M (down, shown red with the word "worse").
+
+## More requests (one per remaining verdict)
+
+**RETIRE: the best dashboard is the one you don't build**
 ```
 Replace the legacy Tableau Kerendia workbook
 ```
 Point at: "Do not migrate waste" (RULE-006). The owner is asked and the old asset keeps running. Approving shows "Retirement approved" and no dashboard is built.
 
-**3. NEW BUILD: no governed KPI yet, but the pack has the data**
+**NEW BUILD: no governed KPI yet, but the pack has the data**
 ```
 Compare Tableau and Power BI report views and exports
 ```
 Point at: "Not a governed KPI yet, but the data pack holds the data. A first working version is built now and marked not governed until an owner defines the KPI." Approve it and open the dashboard: four tiles, Power BI against Tableau (report views and exports), and each chip says "no governed KPI yet" / "not governed". It also ties into the migration story: how much is each platform really used?
-
-
-## More requests (one per remaining verdict)
 
 **EXTEND: a comparison shown side by side**
 ```
