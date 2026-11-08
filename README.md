@@ -4,6 +4,8 @@
 
 Built by Sami and Jessica for the Since AI Hackathon 2026, Bayer challenge **"Build Less, Build Better: AI for Governed Analytics"**.
 
+▶️ **Demo video:** https://youtu.be/pq8RhFVzOkM
+
 ## The problem
 
 Traditional BI is slow, tedious and error-prone. Someone asks for a dashboard, someone builds it, and the estate keeps growing: duplicates, conflicting KPI definitions, and assets nobody owns or opens. An AI that generates dashboards faster only adds more clutter.
