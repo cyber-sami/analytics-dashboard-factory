@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import errors, types
 
+from . import guard
+
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 # First entry can be overridden with GEMINI_MODEL; the rest are fallbacks.
@@ -55,6 +57,8 @@ def _generate(prompt: str, config: types.GenerateContentConfig):
     global _outage_until
     if time.time() < _outage_until:
         raise RuntimeError("Gemini unavailable (all models failed a moment ago; using rules)")
+    if not guard.take_llm_call():   # daily budget for the public demo (engine/guard.py)
+        raise RuntimeError("Gemini daily cap reached (using rules)")
     start, last, tried = time.time(), None, 0
     for i, model in enumerate(CHAIN):
         if time.time() - start > BUDGET_S:
