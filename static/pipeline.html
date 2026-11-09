@@ -34,6 +34,10 @@
   .ddlist[hidden] { display: none; }
   .ddlist li { padding: .55em .7em; border-radius: .4em; cursor: pointer; } .ddlist li:hover, .ddlist li:focus { background: var(--mist); } .ddlist li:focus-visible { outline-offset: -.18em; } .ddlist li[aria-selected="true"] { font-weight: 800; color: var(--brand-blue); }
   textarea { min-height: 5.5em; font-size: var(--l); resize: vertical; }
+  .examples { margin: .9em 0 .2em; }
+  .examples .ex { display: block; width: 100%; text-align: left; margin: .35em 0; padding: .5em .8em; border: .1em solid var(--line); border-radius: .6em; background: #fff; color: var(--ink); font: inherit; cursor: pointer; }
+  .examples .ex:hover, .examples .ex:focus-visible { border-color: var(--brand-blue); background: var(--mist); }
+  .examples .ex b { display: inline-block; min-width: 7em; margin-right: .6em; color: var(--brand-blue); font-size: var(--s); }
   label { display: block; font-weight: 800; margin: 1em 0 .3em; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
 
@@ -288,10 +292,26 @@ async function loadAudit() {
 const chips = (arr, cls) => `<div class="chips">${arr.map(x => `<span class="${cls}">${esc(x)}</span>`).join('')}</div>`;
 const ruleChips = r => chips(Object.entries(r || {}).map(([k, v]) => `${k} ${v}`), 'rule');
 
+// Example requests for visitors; each was run through the real pipeline (see demo-prompts.md). Label = the verdict it gives.
+const EXAMPLES = [
+  ['EXTEND', 'Can we have a new dashboard for net sales and forecast variance for Kerendia?'],
+  ['EXTEND', 'Compare the sales of cardiovascular medicines'],
+  ['RETIRE', 'Replace the legacy Tableau Kerendia workbook'],
+  ['NEW BUILD', 'Compare Tableau and Power BI report views and exports'],
+  ['NEW BUILD', 'Which routes are at red supply risk this month?'],
+  ['REUSE', 'Reimbursement status coverage and market access coverage for Nubeqa in France'],
+  ['CONSOLIDATE', 'What should we do with the Tableau workbook AST-0183?'],
+  ['MIGRATE', 'Please create a Power BI replacement for our legacy Tableau Xarelto commercial workbook.'],
+  ['ASKS BACK', 'Net sales for Zentrafil in Atlantis'],
+];
+function useExample(i) { const ta = $('req'); ta.value = request = EXAMPLES[i][1]; ta.focus(); }
+
 const VIEWS = [
   () => `<h2 tabindex="-1">Ask</h2><div class="sub">Anyone can ask in their own words. No technical terms needed.</div>
     <label for="req">What would you like to see?</label>
     <textarea id="req" placeholder="e.g. A dashboard of net sales and forecast variance for Kerendia">${esc(request)}</textarea>
+    <div class="examples"><div class="small" id="exlbl">Try an example (click to fill the box, then press Ask):</div>
+      ${EXAMPLES.map((e, i) => `<button type="button" class="ex" onclick="useExample(${i})"><b>${esc(e[0])}</b>${esc(e[1])}</button>`).join('')}</div>
     <div class="row"><div><label for="who">Your name</label><input id="who" value="${esc(requester)}" oninput="requester = this.value || 'Guest'; store.set('dfName', this.value.trim())"></div><div></div></div>
     ${errMsg ? `<div class="blocked" role="alert">${esc(errMsg)}</div>` : ''}
     <div class="btns"><button class="act" ${busy ? 'disabled' : ''} onclick="ask()">${busy ? 'Thinking…' : 'Ask the factory'}</button></div>
