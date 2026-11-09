@@ -4,6 +4,8 @@
 
 Built by Sami and Jessica for the Since AI Hackathon 2026, Bayer challenge **"Build Less, Build Better: AI for Governed Analytics"**.
 
+🌐 **Try it live:** https://analytics-dashboard-factory.onrender.com/pipeline (free hosting: the first load can take about 30 seconds)
+
 ▶️ **Demo video:** https://youtu.be/pq8RhFVzOkM
 
 ## The problem
